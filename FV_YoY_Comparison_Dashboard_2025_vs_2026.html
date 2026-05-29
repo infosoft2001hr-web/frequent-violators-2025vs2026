@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>YoY Interactive Dashboard — 2025 vs 2026 (Jan–Apr)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+  :root{
+    --ink:#0f172a; --ink-2:#1e293b; --ink-soft:#475569; --ink-faint:#94a3b8;
+    --bg:#f8fafc; --surface:#ffffff; --line:#e2e8f0;
+    --gold:#f59e0b; --gold-deep:#d97706; --gold-soft:#fef3c7;
+    --plum:#7c3aed; --plum-deep:#6d28d9; --plum-soft:#ede9fe;
+    --rose:#e11d48; --rose-deep:#be123c; --rose-soft:#ffe4e6;
+    --teal:#0d9488; --teal-deep:#0f766e; --teal-soft:#ccfbf1;
+    --sky:#0284c7; --sky-deep:#0369a1; --sky-soft:#e0f2fe;
+    --emerald:#10b981; --emerald-soft:#d1fae5;
+    --grad-hero:linear-gradient(135deg,#0f172a 0%,#1e3a8a 45%,#7c3aed 100%);
+    --grad-gold:linear-gradient(135deg,#fbbf24,#f59e0b);
+    --grad-teal:linear-gradient(135deg,#14b8a6,#0d9488);
+    --shadow:0 4px 12px rgba(15,23,42,.06),0 1px 4px rgba(15,23,42,.04);
+    --shadow-lg:0 12px 32px rgba(15,23,42,.10),0 2px 8px rgba(15,23,42,.04);
+    --co-icc:#1e3a8a; --co-api:#7c3aed; --co-kti:#f59e0b; --co-dbtpi:#0d9488;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var(--ink);font-size:13px;-webkit-font-smoothing:antialiased;line-height:1.5}
+  body{padding:24px;max-width:1500px;margin:0 auto}
+  h1,h2,h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.01em}
+  .num{font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;font-weight:600}
+
+  /* HERO HEADER */
+  .hero{position:relative;background:var(--grad-hero);color:#fff;padding:32px 36px;border-radius:20px;margin-bottom:24px;overflow:hidden;box-shadow:var(--shadow-lg)}
+  .hero::before{content:'';position:absolute;top:-60%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(245,158,11,.3),transparent 70%);pointer-events:none}
+  .hero::after{content:'';position:absolute;bottom:-50%;left:25%;width:400px;height:400px;background:radial-gradient(circle,rgba(124,58,237,.3),transparent 70%);pointer-events:none}
+  .hero-row{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+  .hero-text .eyebrow{font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;opacity:.7;margin-bottom:8px;color:#fbbf24}
+  .hero-text h1{font-size:32px;font-weight:700;margin-bottom:6px;line-height:1.1}
+  .hero-text h1 em{font-style:normal;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero-text .tag{font-size:13px;opacity:.8;font-weight:400;margin-bottom:8px}
+  .hero-text .prepared-by{font-size:11px;opacity:.7;letter-spacing:.02em;font-family:'JetBrains Mono',monospace}
+  .hero-text .prepared-by strong{font-weight:600;opacity:1;color:#fbbf24}
+  .hero-stats{display:flex;gap:12px;flex-wrap:wrap}
+  .hero-stat{background:rgba(255,255,255,.1);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);padding:14px 18px;border-radius:14px;text-align:center;min-width:88px;transition:.25s}
+  .hero-stat:hover{transform:translateY(-2px);background:rgba(255,255,255,.15)}
+  .hero-stat .v{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;line-height:1;background:var(--grad-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .hero-stat .l{font-size:9px;letter-spacing:.12em;text-transform:uppercase;opacity:.8;margin-top:5px;font-weight:600}
+
+  /* STICKY CONTROL BAR */
+  .control-bar{position:sticky;top:0;z-index:50;background:var(--surface);box-shadow:var(--shadow);border-radius:14px;border:1px solid var(--line);padding:16px 22px;margin-bottom:20px;display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+  .ctrl-group{display:flex;flex-direction:column;gap:6px}
+  .ctrl-group label{font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+  .ctrl-group select{padding:9px 30px 9px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;background:#fff;min-width:170px;outline:none;font-family:inherit;color:var(--ink);font-weight:500;cursor:pointer;transition:.18s;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23475569' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center}
+  .ctrl-group select:focus{border-color:var(--plum);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+
+  .pill-group{display:inline-flex;background:var(--bg);padding:4px;border-radius:10px;border:1px solid var(--line)}
+  .pill-group button{padding:8px 14px;border:none;background:transparent;font-size:12px;font-weight:600;cursor:pointer;color:var(--ink-soft);transition:.18s;font-family:inherit;border-radius:7px}
+  .pill-group button.active{background:var(--ink);color:#fff;box-shadow:0 2px 8px rgba(15,23,42,.25)}
+  .pill-group button:hover:not(.active){background:rgba(15,23,42,.05);color:var(--ink)}
+
+  .ctrl-summary{margin-left:auto;display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+  .ctrl-summary .lbl{font-size:9.5px;color:var(--ink-faint);letter-spacing:.1em;text-transform:uppercase;font-weight:600}
+  .ctrl-summary .val{font-family:'Space Grotesk',sans-serif;font-size:24px;font-weight:700;line-height:1}
+  .ctrl-summary .val.down{background:var(--grad-teal);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+  .ctrl-summary .val.up{color:var(--rose)}
+
+  .reset-btn{padding:8px 14px;border:1.5px solid var(--line);background:#fff;font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;font-family:inherit;letter-spacing:.06em;text-transform:uppercase;transition:.18s;border-radius:10px}
+  .reset-btn:hover{background:var(--ink);color:#fff;border-color:var(--ink)}
+
+  /* FILTER CHIPS */
+  .active-filters{margin-bottom:18px;min-height:0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .filter-chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;background:var(--ink);color:#fff;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.02em;font-family:'Inter'}
+  .filter-chip .x{cursor:pointer;font-size:14px;line-height:1;opacity:.7;transition:.15s;background:rgba(255,255,255,.15);width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+  .filter-chip .x:hover{opacity:1;background:rgba(255,255,255,.3)}
+
+  /* KPI ROW */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+  @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+  .kpi{position:relative;background:var(--surface);padding:20px 22px;border-radius:16px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden;transition:.25s;cursor:pointer}
+  .kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
+  .kpi.active{border-color:var(--ink);border-width:2px;background:linear-gradient(180deg,#fafbff,#fff)}
+  .kpi.dim{opacity:.45}
+  .kpi::before{content:'';position:absolute;top:0;left:0;width:5px;height:100%;background:var(--ink)}
+  .kpi.k-gold::before{background:linear-gradient(180deg,#fbbf24,#d97706)}
+  .kpi.k-plum::before{background:linear-gradient(180deg,#a78bfa,#6d28d9)}
+  .kpi.k-sky::before{background:linear-gradient(180deg,#38bdf8,#0369a1)}
+  .kpi.k-rose::before{background:linear-gradient(180deg,#fb7185,#be123c)}
+  .kpi .label{font-size:10px;color:var(--ink-soft);font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+  .kpi .icon{width:24px;height:24px;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:700}
+  .kpi.k-gold .icon{background:var(--grad-gold)}
+  .kpi.k-plum .icon{background:linear-gradient(135deg,#a78bfa,#7c3aed)}
+  .kpi.k-sky .icon{background:linear-gradient(135deg,#38bdf8,#0284c7)}
+  .kpi.k-rose .icon{background:linear-gradient(135deg,#fb7185,#e11d48)}
+  .kpi .compare{display:flex;align-items:baseline;gap:8px;margin-bottom:10px}
+  .kpi .y25{font-family:'JetBrains Mono',monospace;font-size:15px;color:var(--ink-faint);font-weight:600}
+  .kpi .arrow{color:var(--ink-faint);font-size:14px}
+  .kpi .y26{font-family:'Space Grotesk',sans-serif;font-size:34px;color:var(--ink);font-weight:700;line-height:1}
+  .kpi .delta{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;padding:4px 10px;border-radius:8px;letter-spacing:.02em}
+  .delta.down{background:var(--teal-soft);color:var(--teal-deep)}
+  .delta.up{background:var(--rose-soft);color:var(--rose-deep)}
+  .delta.flat{background:#f1f5f9;color:var(--ink-soft)}
+  .kpi .sub{font-size:11px;color:var(--ink-soft);margin-top:8px;line-height:1.4}
+  .kpi .spark{margin-top:10px;height:30px}
+
+  /* LEAD */
+  .lead-panel{background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#fff;padding:22px 26px;border-radius:16px;margin-bottom:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .lead-panel::before{content:'';position:absolute;top:-50%;right:-15%;width:300px;height:300px;background:radial-gradient(circle,rgba(245,158,11,.2),transparent 70%);pointer-events:none}
+  .lead-panel .label{font-size:10px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;position:relative;z-index:1}
+  .lead-panel p{font-size:14px;line-height:1.65;color:#cbd5e1;position:relative;z-index:1}
+  .lead-panel p strong{color:#fff;font-weight:600}
+  .lead-panel p em{font-style:normal;color:#fbbf24;font-weight:600}
+
+  /* PANEL */
+  .panel{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);border:1px solid var(--line);padding:22px 26px;margin-bottom:20px}
+  .panel h2{font-size:15px;font-weight:700;color:var(--ink);margin-bottom:4px;display:flex;align-items:center;gap:10px}
+  .panel .panel-sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:16px}
+  .panel .badge{display:inline-block;padding:3px 10px;border-radius:999px;font-size:10px;letter-spacing:.04em;font-weight:600;color:#fff}
+  .panel .badge.b-ink{background:var(--ink)}
+  .panel .badge.b-gold{background:var(--gold)}
+  .panel .badge.b-teal{background:var(--teal)}
+  .panel .badge.b-plum{background:var(--plum)}
+  .panel .badge.b-rose{background:var(--rose)}
+
+  .row{display:grid;gap:18px;margin-bottom:18px}
+  .row-2{grid-template-columns:1fr 1fr}
+  @media(max-width:1000px){.row-2{grid-template-columns:1fr}}
+
+  /* CHART */
+  .chart-wrap{position:relative;height:260px;width:100%}
+  .chart-wrap.tall{height:320px}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  thead th{background:#f8fafc;color:var(--ink);font-weight:700;padding:10px 10px;text-align:left;border-bottom:2px solid var(--ink);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;cursor:pointer;user-select:none;transition:.15s}
+  thead th.sortable:hover{background:#f1f5f9}
+  thead th.sortable::after{content:'⇅';opacity:.3;margin-left:4px;font-size:10px}
+  thead th.sortable.sort-asc::after{content:'↑';opacity:1;color:var(--plum)}
+  thead th.sortable.sort-desc::after{content:'↓';opacity:1;color:var(--plum)}
+  tbody td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle;transition:.15s}
+  tbody tr{transition:.15s}
+  tbody tr:hover{background:#f8fafc}
+  th.num,td.num{text-align:right;font-family:'JetBrains Mono',monospace;font-variant-numeric:tabular-nums}
+  .delta-cell{font-weight:700;padding:3px 9px;border-radius:7px;display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.02em}
+
+  /* COMPANY CARDS */
+  .co-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  @media(max-width:1000px){.co-grid{grid-template-columns:repeat(2,1fr)}}
+  .co-card{position:relative;background:var(--surface);border-radius:14px;padding:18px;cursor:pointer;transition:.25s;border:1.5px solid var(--line);overflow:hidden}
+  .co-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+  .co-card.active{border-color:var(--ink);border-width:2px;background:linear-gradient(180deg,#fafbff,#fff)}
+  .co-card::before{content:'';position:absolute;top:0;left:0;width:100%;height:4px}
+  .co-card.icc::before{background:linear-gradient(90deg,#3b82f6,#1e3a8a)}
+  .co-card.api::before{background:linear-gradient(90deg,#a78bfa,#7c3aed)}
+  .co-card.kti::before{background:linear-gradient(90deg,#fbbf24,#d97706)}
+  .co-card.dbtpi::before{background:linear-gradient(90deg,#14b8a6,#0d9488)}
+  .co-card .co-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .co-card .co-name{font-size:10.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--ink)}
+  .co-card .co-pct-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:999px;color:#fff;font-family:'JetBrains Mono',monospace}
+  .co-card.icc .co-pct-badge{background:#1e3a8a}
+  .co-card.api .co-pct-badge{background:#7c3aed}
+  .co-card.kti .co-pct-badge{background:#d97706}
+  .co-card.dbtpi .co-pct-badge{background:#0d9488}
+  .co-card .co-total{font-family:'Space Grotesk',sans-serif;font-size:32px;font-weight:700;line-height:1;margin-bottom:8px}
+  .co-card .co-bd{display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:10.5px;padding-top:10px;border-top:1px solid var(--line)}
+  .co-card .co-bd-item{display:flex;justify-content:space-between;color:var(--ink-soft)}
+  .co-card .co-bd-item strong{color:var(--ink);font-family:'JetBrains Mono',monospace;font-weight:700}
+
+  /* DEPT */
+  .dept-row{display:grid;grid-template-columns:1.6fr 0.55fr 100px;gap:12px;padding:9px 10px;border-radius:8px;font-size:11.5px;align-items:center;transition:.15s;margin-bottom:2px}
+  .dept-row:hover{background:#f8fafc}
+  .dept-row .nm{color:var(--ink);font-weight:600}
+  .dept-row .ct{font-family:'JetBrains Mono',monospace;color:var(--ink);text-align:right;font-weight:600}
+  .dept-row .ct .ppl{color:var(--ink-soft);font-weight:500;font-size:10px}
+  .dept-row .bar-wrap{background:#f1f5f9;height:7px;border-radius:4px;overflow:hidden}
+  .dept-row .bar{height:100%;background:linear-gradient(90deg,#1e3a8a,#7c3aed);border-radius:4px;transition:.6s}
+
+  /* SEARCH */
+  .search-bar{position:relative;display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+  .search-input{padding:10px 14px 10px 36px;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;font-family:inherit;outline:none;flex:1;min-width:200px;transition:.18s;background-color:#fff;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' fill='none' viewBox='0 0 24 24'%3E%3Ccircle cx='11' cy='11' r='7' stroke='%23475569' stroke-width='2'/%3E%3Cpath d='m21 21-4.35-4.35' stroke='%23475569' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:12px center}
+  .search-input:focus{border-color:var(--plum);box-shadow:0 0 0 3px rgba(124,58,237,.12)}
+
+  /* RISK BADGE */
+  .risk-badge{padding:2px 8px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;display:inline-block;font-family:'Inter'}
+  .risk-high{background:var(--rose-soft);color:var(--rose-deep);border:1px solid #fecdd3}
+  .risk-medium{background:var(--gold-soft);color:var(--gold-deep);border:1px solid #fde68a}
+  .risk-low{background:#f1f5f9;color:var(--ink-soft);border:1px solid var(--line)}
+  .risk-clean{background:var(--emerald-soft);color:#047857;border:1px solid #a7f3d0}
+
+  /* COMPANY CHIP */
+  .co-chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:9.5px;font-weight:700;letter-spacing:.04em;color:#fff;font-family:'JetBrains Mono',monospace}
+  .co-chip.icc{background:#1e3a8a}
+  .co-chip.api{background:#7c3aed}
+  .co-chip.kti{background:#d97706}
+  .co-chip.dbtpi{background:#0d9488}
+
+  /* EMPLOYEE TABLE - special styling */
+  #empTable{width:100%}
+  #empTable tbody tr.empty-row td{text-align:center;color:var(--ink-faint);padding:30px;font-style:italic}
+  #empTable tbody tr.emp-row{cursor:pointer}
+  #empTable tbody tr.emp-row.expanded{background:#f8fafc}
+  #empTable tbody tr.emp-detail td{padding:0;background:#fafbff;border-bottom:1px solid var(--line)}
+  .emp-detail-inner{padding:18px 22px;border-top:2px solid var(--plum)}
+  .emp-detail-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:18px}
+  @media(max-width:900px){.emp-detail-grid{grid-template-columns:1fr}}
+  .emp-meta-card{background:#fff;padding:14px 16px;border-radius:10px;border:1px solid var(--line)}
+  .emp-meta-card .field{margin-bottom:8px}
+  .emp-meta-card .field:last-child{margin-bottom:0}
+  .emp-meta-card .field-label{font-size:9.5px;font-weight:700;color:var(--ink-soft);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+  .emp-meta-card .field-value{font-size:12.5px;color:var(--ink);font-weight:500}
+  .emp-month-table{width:100%;font-size:11px}
+  .emp-month-table th{background:transparent;border-bottom:1.5px solid var(--ink);padding:6px 8px;font-size:9.5px;cursor:default}
+  .emp-month-table th:hover{background:transparent}
+  .emp-month-table th::after{display:none}
+  .emp-month-table td{padding:7px 8px;border-bottom:1px solid var(--line);font-family:'JetBrains Mono',monospace;text-align:right}
+  .emp-month-table td:first-child{text-align:left;font-family:'Inter';font-weight:700;color:var(--ink-soft);letter-spacing:.04em}
+  .expand-icon{display:inline-block;width:20px;height:20px;border-radius:5px;background:#f1f5f9;color:var(--ink-soft);text-align:center;line-height:20px;font-size:11px;font-weight:700;transition:.2s}
+  .emp-row.expanded .expand-icon{background:var(--plum);color:#fff;transform:rotate(90deg)}
+  .name-cell{font-weight:600;color:var(--ink)}
+  .dept-cell{font-size:10.5px;color:var(--ink-soft)}
+
+  /* TAKEAWAYS */
+  .takeaways-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .takeaway-card{padding:18px 20px;border-radius:14px;border:1px solid var(--line);background:var(--surface);position:relative;overflow:hidden;transition:.25s}
+  .takeaway-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+  .takeaway-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px}
+  .takeaway-card.gold::before{background:var(--grad-gold)}
+  .takeaway-card.teal::before{background:var(--grad-teal)}
+  .takeaway-card.plum::before{background:linear-gradient(135deg,#a78bfa,#7c3aed)}
+  .takeaway-card.rose::before{background:linear-gradient(135deg,#fb7185,#e11d48)}
+  .takeaway-card.sky::before{background:linear-gradient(135deg,#38bdf8,#0284c7)}
+  .takeaway-card.ink::before{background:var(--grad-hero)}
+  .takeaway-card .tk-tag{display:inline-block;padding:3px 10px;border-radius:999px;font-size:9.5px;font-weight:700;color:#fff;letter-spacing:.06em;margin-bottom:10px}
+  .takeaway-card.gold .tk-tag{background:var(--gold)}
+  .takeaway-card.teal .tk-tag{background:var(--teal)}
+  .takeaway-card.plum .tk-tag{background:var(--plum)}
+  .takeaway-card.rose .tk-tag{background:var(--rose)}
+  .takeaway-card.sky .tk-tag{background:var(--sky)}
+  .takeaway-card.ink .tk-tag{background:var(--ink)}
+  .takeaway-card h4{font-family:'Space Grotesk',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px;color:var(--ink);line-height:1.3}
+  .takeaway-card p{font-size:12px;color:var(--ink-soft);line-height:1.55}
+
+  /* FOOTER */
+  .footer{text-align:center;color:var(--ink-soft);font-size:10px;letter-spacing:.15em;text-transform:uppercase;margin:32px 0 10px;font-family:'JetBrains Mono',monospace}
+  .footer strong{color:var(--ink)}
+
+  /* FADE animation */
+  .fade-update{animation:fadeUpdate .35s ease}
+  @keyframes fadeUpdate{from{opacity:.5;transform:translateY(2px)}to{opacity:1;transform:translateY(0)}}
+
+  /* DEPT DETAIL — expandable */
+  .dept-row-clickable{cursor:pointer}
+  .dept-row-clickable:hover .dept-expand-arrow{background:#e2e8f0}
+  .dept-row-clickable.expanded{background:#faf5ff}
+  .dept-detail{margin:8px 0 16px;padding:18px 20px;background:linear-gradient(180deg,#faf5ff,#fff);border:1px solid #ede9fe;border-left:4px solid #7c3aed;border-radius:10px;animation:fadeUpdate .3s ease}
+  .dd-header{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;padding-bottom:14px;border-bottom:1px solid #ede9fe;margin-bottom:14px;flex-wrap:wrap}
+  .dd-eyebrow{font-size:9px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:#64748b;margin-bottom:4px}
+  .dd-headline{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:700;line-height:1.2}
+  .dd-stats{display:flex;gap:14px}
+  .dd-stat{text-align:center;padding:0 10px}
+  .dd-stat-v{font-family:'Space Grotesk',sans-serif;font-size:20px;font-weight:700;color:#0f172a;line-height:1}
+  .dd-stat-l{font-size:9px;color:#64748b;letter-spacing:.08em;text-transform:uppercase;margin-top:4px;font-weight:600}
+
+  .dd-section{margin-bottom:14px}
+  .dd-section:last-child{margin-bottom:0}
+  .dd-section-title{font-size:9.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:10px}
+
+  .dd-cat-list{display:flex;flex-direction:column;gap:6px}
+  .dd-cat-row{display:grid;grid-template-columns:90px 1fr 95px;gap:10px;align-items:center;font-size:11.5px}
+  .dd-cat-label{font-weight:700}
+  .dd-cat-bar-wrap{height:8px;border-radius:4px;overflow:hidden}
+  .dd-cat-bar{height:100%;border-radius:4px;transition:width .5s}
+  .dd-cat-val{font-family:'JetBrains Mono',monospace;font-size:12px;text-align:right;color:#0f172a}
+
+  .dd-month-chart{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;align-items:end;height:90px;padding:0 8px}
+  .dd-month-col{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}
+  .dd-month-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:#0f172a}
+  .dd-month-bar{width:100%;max-width:42px;background:linear-gradient(180deg,#7c3aed,#6d28d9);border-radius:4px 4px 0 0;min-height:2px;transition:height .5s}
+  .dd-month-lbl{font-size:9.5px;color:#64748b;font-weight:700;letter-spacing:.08em}
+
+  .dd-emp-list{display:flex;flex-direction:column;gap:5px}
+  .dd-emp-row{display:flex;align-items:center;gap:10px;padding:7px 10px;background:#fff;border-radius:7px;border:1px solid #f1f5f9;font-size:11.5px}
+  .dd-emp-name{font-weight:600;color:#0f172a;flex:1}
+  .dd-emp-total{font-family:'JetBrains Mono',monospace;color:#f59e0b;font-weight:700}
+
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-row">
+    <div class="hero-text">
+      <div class="eyebrow">INFOSOFT  ·  ACCELTECH  ·  KASSATECH  ·  DIMENSIONS</div>
+      <h1>Year-over-Year <em>Interactive Dashboard</em></h1>
+      <div class="tag">Timekeeping violations — 2025 vs 2026 (Jan–Apr) · Policy impact deep dive · Click any element to drill down</div>
+      <div class="prepared-by">PREPARED BY: <strong>ALEXIS PARRERA, CHRA</strong> -- HRIS &amp; Timekeeping</div>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="v">−28%</div><div class="l">Tard Mins</div></div>
+      <div class="hero-stat"><div class="v">−8%</div><div class="l">No-Bio</div></div>
+      <div class="hero-stat"><div class="v">−24%</div><div class="l">Adjustments</div></div>
+      <div class="hero-stat"><div class="v">163</div><div class="l">Violators</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- STICKY CONTROL BAR -->
+<div class="control-bar">
+  <div class="ctrl-group">
+    <label>Company</label>
+    <select id="companyFilter">
+      <option value="ALL">All companies</option>
+      <option value="ICC">ICC — Infosoft</option>
+      <option value="API">API — Acceltech</option>
+      <option value="KTI">KTI — Kassatech</option>
+      <option value="DBTPI">DBTPI — Dimensions</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Category</label>
+    <select id="categoryFilter">
+      <option value="ALL">All categories</option>
+      <option value="tardiness">Tardiness (events)</option>
+      <option value="tard_mins">Tardiness (minutes)</option>
+      <option value="nobio">No Bio / DTR</option>
+      <option value="adjustment">Adjustments</option>
+      <option value="absences">Absences</option>
+    </select>
+  </div>
+  <div class="ctrl-group">
+    <label>Year overlay</label>
+    <div class="pill-group" id="yearToggle">
+      <button data-year="both" class="active">Both</button>
+      <button data-year="2025">2025</button>
+      <button data-year="2026">2026</button>
+    </div>
+  </div>
+  <button class="reset-btn" id="resetBtn">Reset all</button>
+  <div class="ctrl-summary">
+    <div class="lbl" id="summaryLabel">YoY Δ — Total · Q1+Apr</div>
+    <div class="val down" id="summaryValue">▼ −20%</div>
+  </div>
+</div>
+
+<!-- ACTIVE FILTERS -->
+<div class="active-filters" id="activeFilters"></div>
+
+<!-- KPI CARDS -->
+<div class="kpi-grid" id="statsGrid">
+  <div class="kpi k-gold" data-cat="tard_mins">
+    <div class="label">Tardiness · Minutes <span class="icon">⏱</span></div>
+    <div class="compare"><span class="y25" id="s1-25">9,460</span><span class="arrow">→</span><span class="y26" id="s1-26">6,812</span></div>
+    <div class="delta down" id="s1-delta">▼ −28%</div>
+    <div class="sub" id="s1-sub">2,648 fewer late minutes year over year</div>
+  </div>
+  <div class="kpi k-plum" data-cat="nobio">
+    <div class="label">No Bio / DTR <span class="icon">✕</span></div>
+    <div class="compare"><span class="y25" id="s2-25">405</span><span class="arrow">→</span><span class="y26" id="s2-26">371</span></div>
+    <div class="delta down" id="s2-delta">▼ −8%</div>
+    <div class="sub" id="s2-sub">Q1 was +28% — April flipped trend to decline</div>
+  </div>
+  <div class="kpi k-sky" data-cat="adjustment">
+    <div class="label">Adjustments <span class="icon">✎</span></div>
+    <div class="compare"><span class="y25" id="s3-25">79</span><span class="arrow">→</span><span class="y26" id="s3-26">60</span></div>
+    <div class="delta down" id="s3-delta">▼ −24%</div>
+    <div class="sub" id="s3-sub">Fewer manual corrections needed</div>
+  </div>
+  <div class="kpi k-rose" data-cat="absences">
+    <div class="label">Absences <span class="icon">!</span></div>
+    <div class="compare"><span class="y25" id="s4-25">8</span><span class="arrow">→</span><span class="y26" id="s4-26">14</span></div>
+    <div class="delta up" id="s4-delta">▲ +75%</div>
+    <div class="sub" id="s4-sub">Small N — interpret with caution</div>
+  </div>
+</div>
+
+<!-- LEAD -->
+<div class="lead-panel">
+  <div class="label">POLICY ENFORCEMENT IMPACT — APRIL HEADLINE</div>
+  <p>
+    Year-over-year, <strong>three of four measurable violation categories improved</strong> — and the largest gains landed in <em>April 2026, the first complete month under the strict timekeeping policy effective March 31</em>. No-Bio events alone fell from 145 in April 2025 to 39 in April 2026, a <strong>73% drop</strong>. Use the controls above to filter by company, category, or year, or scroll down to drill into individual employees.
+  </p>
+</div>
+
+<!-- TREND CHARTS -->
+<div class="row row-2">
+  <div class="panel">
+    <h2>Tardiness Minutes — Monthly Trend <span class="badge b-gold">apple-to-apple</span></h2>
+    <div class="panel-sub">Both years measured in total late minutes across all employees</div>
+    <div class="chart-wrap tall"><canvas id="chartTardMins"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2>No Bio / DTR Disputes <span class="badge b-plum">apple-to-apple</span></h2>
+    <div class="panel-sub">Event counts per month — same definition in both years</div>
+    <div class="chart-wrap tall"><canvas id="chartNoBio"></canvas></div>
+  </div>
+</div>
+
+<div class="row row-2">
+  <div class="panel">
+    <h2>Payroll Adjustments <span class="badge b-sky">apple-to-apple</span></h2>
+    <div class="panel-sub">Adjustment requests filed per month</div>
+    <div class="chart-wrap tall"><canvas id="chartAdj"></canvas></div>
+  </div>
+  <div class="panel">
+    <h2>Absences <span class="badge b-rose">small sample</span></h2>
+    <div class="panel-sub">Absence days per month — interpret with caution</div>
+    <div class="chart-wrap tall"><canvas id="chartAbs"></canvas></div>
+  </div>
+</div>
+
+<!-- 2026 STACKED -->
+<div class="panel">
+  <h2 id="combinedTitle">2026 Within-Year Trajectory — All Categories <span class="badge b-ink">stacked</span></h2>
+  <div class="panel-sub" id="combinedSub">383 in January, 147 in April — a 62% drop in four months</div>
+  <div class="chart-wrap" style="height:300px"><canvas id="chartCombined"></canvas></div>
+</div>
+
+<!-- DELTA TABLE -->
+<div class="panel">
+  <h2>Detailed YoY Deltas <span class="badge b-ink">click headers to sort</span></h2>
+  <div class="panel-sub">Month-by-month and category-by-category. Sign: ▼ = improvement.</div>
+  <div style="overflow-x:auto">
+    <table id="deltaTable">
+      <thead>
+        <tr>
+          <th class="sortable" data-sort="label">Category</th>
+          <th>Unit</th>
+          <th class="num sortable" data-sort="jan25">Jan-25</th>
+          <th class="num sortable" data-sort="jan26">Jan-26</th>
+          <th class="num sortable" data-sort="feb25">Feb-25</th>
+          <th class="num sortable" data-sort="feb26">Feb-26</th>
+          <th class="num sortable" data-sort="mar25">Mar-25</th>
+          <th class="num sortable" data-sort="mar26">Mar-26</th>
+          <th class="num sortable" data-sort="apr25">Apr-25</th>
+          <th class="num sortable" data-sort="apr26">Apr-26</th>
+          <th class="num sortable" data-sort="sum25">25 Total</th>
+          <th class="num sortable" data-sort="sum26">26 Total</th>
+          <th class="num sortable sort-desc" data-sort="pct">YoY Δ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- COMPANY CARDS -->
+<div class="panel">
+  <h2>2026 Per-Company Snapshot <span class="badge b-ink">click to filter</span></h2>
+  <div class="panel-sub">YTD Jan-Apr 2026. ICC drives 59% of total violations</div>
+  <div class="co-grid" id="coGrid"></div>
+</div>
+
+<!-- DEPT + APR -->
+<div class="row row-2">
+  <div class="panel">
+    <h2>YTD Department Ranking <span class="badge b-plum">All 37 · As of Apr 2026</span></h2>
+    <div class="panel-sub">Every department with at least one violation, ranked by total YTD count · scrollable</div>
+    <div id="deptList" style="max-height:560px;overflow-y:auto;padding-right:8px"></div>
+  </div>
+  <div class="panel">
+    <h2>April Watch List <span class="badge b-rose">Top 10</span></h2>
+    <div class="panel-sub">Highest individual counts this month</div>
+    <table id="topApr">
+      <thead><tr>
+        <th class="sortable sort-asc" data-sort="rank">#</th>
+        <th class="sortable" data-sort="name">Employee</th>
+        <th class="sortable" data-sort="co">Co.</th>
+        <th class="num sortable" data-sort="total">Total</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- EMPLOYEE DRILL-DOWN -->
+<div class="panel">
+  <h2>Employee Deep Dive <span class="badge b-plum">163 violators · click any row to expand</span></h2>
+  <div class="panel-sub">Full per-employee monthly breakdown across all categories — search, filter by risk level, sort any column.</div>
+
+  <div class="search-bar">
+    <input type="text" id="empSearch" class="search-input" placeholder="Search by name, department, or position...">
+    <div class="ctrl-group" style="margin:0">
+      <select id="empRiskFilter" style="padding:9px 30px 9px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:12.5px;background:#fff;outline:none;font-family:inherit;font-weight:500;cursor:pointer;appearance:none;background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23475569' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E&quot;);background-repeat:no-repeat;background-position:right 12px center">
+        <option value="ALL">All risk levels</option>
+        <option value="HIGH">High (3+ categories)</option>
+        <option value="MEDIUM">Medium (2 categories)</option>
+        <option value="LOW">Low (1 category)</option>
+      </select>
+    </div>
+    <div style="font-size:11px;color:var(--ink-soft);padding:0 6px">
+      Showing <strong id="empCount" style="color:var(--ink)">163</strong> of 163
+    </div>
+  </div>
+
+  <div style="overflow-x:auto;max-height:600px;overflow-y:auto;border:1px solid var(--line);border-radius:10px">
+    <table id="empTable">
+      <thead style="position:sticky;top:0;z-index:5;background:#f8fafc">
+        <tr>
+          <th></th>
+          <th class="sortable" data-sort="n">Employee</th>
+          <th class="sortable" data-sort="c">Co.</th>
+          <th class="sortable" data-sort="risk">Risk</th>
+          <th class="num sortable" data-sort="t">Tard</th>
+          <th class="num sortable" data-sort="nb">NoBio</th>
+          <th class="num sortable" data-sort="a">Adj</th>
+          <th class="num sortable" data-sort="ab">Abs</th>
+          <th class="num sortable sort-desc" data-sort="tot">Total YTD</th>
+        </tr>
+      </thead>
+      <tbody id="empTbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- TAKEAWAYS GRID -->
+<div class="panel" style="background:linear-gradient(180deg,#f8fafc,#fff)">
+  <h2>Key Takeaways for the Executive Committee <span class="badge b-ink">Q1+Apr 2026</span></h2>
+  <div class="panel-sub">Hover any card. These are the points that drive the YoY story.</div>
+  <div class="takeaways-grid">
+    <div class="takeaway-card teal">
+      <span class="tk-tag">POLICY WIN</span>
+      <h4>No Bio dropped 73% YoY in April</h4>
+      <p>April 2025 had 145 No-Bio events; April 2026 has just 39. Largest single-month YoY drop across any category — the strongest signal that strict policy enforcement is working.</p>
+    </div>
+    <div class="takeaway-card gold">
+      <span class="tk-tag">APPLE-TO-APPLE</span>
+      <h4>Tardiness minutes down 28%</h4>
+      <p>9,460 → 6,812 across Jan–Apr. Same unit both years — this is the cleanest single comparison and removes any ambiguity from the YoY story.</p>
+    </div>
+    <div class="takeaway-card sky">
+      <span class="tk-tag">EFFICIENCY</span>
+      <h4>Payroll adjustments down 24%</h4>
+      <p>Fewer manual corrections needed (79 → 60) — employees are recording attendance correctly the first time, freeing payroll resources.</p>
+    </div>
+    <div class="takeaway-card plum">
+      <span class="tk-tag">STRUCTURAL</span>
+      <h4>62% quarterly decline</h4>
+      <p>Total violations Jan→Apr 2026: 383 → 273 → 188 → 147. Sustained downward trend, not seasonal volatility.</p>
+    </div>
+    <div class="takeaway-card rose">
+      <span class="tk-tag">ESCALATE</span>
+      <h4>ARZAGA: 4-month watch list leader</h4>
+      <p>ARZAGA, CHARLIE C. (ICC, BU - Mindanao 1) has topped the monthly list every month YTD with 46 cumulative violations. HRBP performance conversation recommended.</p>
+    </div>
+    <div class="takeaway-card ink">
+      <span class="tk-tag">FOCUS</span>
+      <h4>ICC drives 59% of YTD cases</h4>
+      <p>580 of 991 violations are ICC. BU-level coaching at Microsoft &amp; Solver, Manufacturing &amp; Agrid Luzon, Mindanao 1 = highest-leverage intervention.</p>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  YOY DASHBOARD ▸ JAN–APR 2025 vs 2026 ▸ DATA AUDITED ✓ ▸ POLICY EFFECTIVE 2026-03-31 ▸ Prepared by: <strong>ALEXIS PARRERA, CHRA</strong> -- HRIS &amp; Timekeeping
+</div>
+
+
+<script>
+// EMBEDDED DATA
+const EMPLOYEES = [{"n":"ARZAGA, CHARLIE C.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION TESTER","m":{"JAN":{"t":18,"tm":204,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":10,"tm":69,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":8,"tm":31,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":9,"tm":66,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":45,"u":0,"nb":1,"a":0,"ab":0,"tot":46}},{"n":"NAVARRO, KIM ANDREW A.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":5,"tm":44,"u":0,"nb":7,"a":1,"ab":0},"FEB":{"t":8,"tm":161,"u":0,"nb":4,"a":0,"ab":0},"MAR":{"t":4,"tm":14,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":2,"tm":7,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":19,"u":0,"nb":12,"a":1,"ab":0,"tot":32}},{"n":"LLIDO, NICA ANDREA L.","c":"DBTPI","d":"FINANCING DIMENSIONS","p":"JR. BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":7,"tm":84,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":9,"tm":72,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":2,"tm":10,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":2,"tm":6,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":20,"u":0,"nb":3,"a":0,"ab":0,"tot":23}},{"n":"SALES, LENDON B.","c":"ICC","d":"BU - VISAYAS 1","p":"LEAD - BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":3,"tm":37,"u":0,"nb":4,"a":1,"ab":0},"FEB":{"t":5,"tm":70,"u":0,"nb":1,"a":0,"ab":1},"MAR":{"t":2,"tm":32,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":2,"tm":4,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":12,"u":0,"nb":5,"a":1,"ab":1,"tot":19}},{"n":"MADRAZO, EVANIE B.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":10,"tm":248,"u":0,"nb":1,"a":2,"ab":0},"FEB":{"t":2,"tm":31,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":2,"tm":58,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":15,"u":0,"nb":1,"a":2,"ab":0,"tot":18}},{"n":"PELONGO, RHENALYN R.","c":"DBTPI","d":"FACILITY DIMENSIONS AND ASSET DIMENSIONS","p":"JR. BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":11,"tm":108,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":6,"tm":95,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":8,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":18,"u":0,"nb":0,"a":0,"ab":0,"tot":18}},{"n":"CELEBRE, MARYAM F.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":4,"tm":22,"u":0,"nb":0,"a":0,"ab":1},"MAR":{"t":2,"tm":69,"u":0,"nb":3,"a":0,"ab":0},"APR":{"t":3,"tm":92,"u":0,"nb":2,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":7,"a":0,"ab":1,"tot":17}},{"n":"PINEDA, JOANA MARIE D.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"JR. PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":8,"a":0,"ab":0},"FEB":{"t":1,"tm":1,"u":1,"nb":3,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":1,"u":1,"nb":13,"a":2,"ab":0,"tot":17}},{"n":"OROY, AARON TROY B.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":5,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":6,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":5,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":0,"u":0,"nb":16,"a":1,"ab":0,"tot":17}},{"n":"GOTERA, ULYSES GERALD S.","c":"DBTPI","d":"DIMENSIONS FOR PHILIPPINE OPERATIONS","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":3,"tm":13,"u":0,"nb":0,"a":2,"ab":0},"FEB":{"t":5,"tm":27,"u":0,"nb":1,"a":1,"ab":0},"MAR":{"t":3,"tm":36,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":3,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":12,"u":0,"nb":2,"a":3,"ab":0,"tot":17}},{"n":"BASUEL, ADRIANNE JOHN M.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":9,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":6,"tm":104,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":5,"tm":23,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":3,"tm":44,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":15,"u":0,"nb":1,"a":0,"ab":0,"tot":16}},{"n":"HABAL, ALFIE C.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"JR. PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":4,"a":0,"ab":0},"FEB":{"t":1,"tm":1,"u":0,"nb":6,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":3,"a":1,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":14,"a":1,"ab":0,"tot":16}},{"n":"MACEDA, KOLLINE A.","c":"ICC","d":"ACCOUNTING AND FINANCE","p":"ACCOUNTING SUPERVISOR","m":{"JAN":{"t":6,"tm":23,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":5,"tm":22,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":3,"tm":26,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":14,"u":0,"nb":1,"a":0,"ab":0,"tot":15}},{"n":"INTERNO, GIO YVES C.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"JR. PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":7,"a":0,"ab":0},"FEB":{"t":2,"tm":30,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":13,"a":0,"ab":0,"tot":15}},{"n":"CANLAS, ELLAINE PAULA S.","c":"API","d":"SALES DEPARTMENT","p":"PARTNER SUCCESS CONSULTANT","m":{"JAN":{"t":5,"tm":14,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":1,"tm":4,"u":0,"nb":2,"a":2,"ab":0},"APR":{"t":3,"tm":72,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":3,"a":2,"ab":0,"tot":14}},{"n":"IGNITE, KRISTIAN PIOUS A.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"TEAM LEAD - DEVELOPMENT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":10,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":13,"a":0,"ab":0,"tot":14}},{"n":"OMOSURA, BIENVENIDO","c":"DBTPI","d":"DIMENSIONS FOR AGRICULTURE","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":8,"tm":155,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"tm":21,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":31,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":12,"u":0,"nb":2,"a":0,"ab":0,"tot":14}},{"n":"FLORES, JOHN POL J.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":7,"tm":52,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":2,"tm":30,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":3,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":10,"u":0,"nb":3,"a":0,"ab":0,"tot":13}},{"n":"DACARA, NOEL A.","c":"API","d":"TECHNICAL DEVELOPMENT","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":2,"tm":96,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":1,"tm":17,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":3,"tm":34,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":61,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":7,"u":0,"nb":6,"a":0,"ab":0,"tot":13}},{"n":"ANTOQUE, ANJO A.","c":"DBTPI","d":"ISV-POS","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":5,"tm":50,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"tm":4,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":1,"tm":1,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":4,"a":0,"ab":0,"tot":13}},{"n":"VALENCIA, JOHN VINCENT G.","c":"ICC","d":"TECHNICAL SUPPORT","p":"TECHNICAL SUPPORT","m":{"JAN":{"t":5,"tm":77,"u":0,"nb":0,"a":0,"ab":1},"FEB":{"t":3,"tm":34,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":24,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":5,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":11,"u":0,"nb":0,"a":0,"ab":1,"tot":12}},{"n":"DEGORIO, FRANCIS C.","c":"ICC","d":"BU - VISAYAS 2","p":"LEAD - BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":8,"u":0,"nb":5,"a":0,"ab":0},"FEB":{"t":2,"tm":9,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":1,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":1,"nb":1,"a":0,"ab":0}},"y":{"t":4,"u":1,"nb":7,"a":0,"ab":0,"tot":12}},{"n":"LEGASPI, HYACINTH LEI D.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":7,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":3,"tm":83,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":3,"tm":36,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":7,"u":0,"nb":5,"a":0,"ab":0,"tot":12}},{"n":"BULAHAN, MAYBELLE R.","c":"API","d":"BU - INTERNATIONAL","p":"JR. PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"tm":40,"u":0,"nb":0,"a":2,"ab":0},"MAR":{"t":4,"tm":42,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":1}},"y":{"t":7,"u":0,"nb":2,"a":2,"ab":1,"tot":12}},{"n":"HINUGUIN, AINEE JOY","c":"ICC","d":"BU - MINDANAO 1","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":6,"tm":89,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":3,"tm":13,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":11,"u":0,"nb":0,"a":0,"ab":0,"tot":11}},{"n":"SAROL, JASPER RONNIE V.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"TEAM LEAD (CUSTOMER SUPPORT)","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":3,"tm":29,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":2,"tm":35,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":2,"tm":36,"u":0,"nb":1,"a":1,"ab":0}},"y":{"t":7,"u":0,"nb":3,"a":1,"ab":0,"tot":11}},{"n":"LEQUIN, JAMES CLAUDE B.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":4,"tm":12,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":16,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":12,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":13,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":8,"u":0,"nb":3,"a":0,"ab":0,"tot":11}},{"n":"DASALLA, CRIS ERIC JR S.","c":"ICC","d":"BU - VISAYAS 2","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":7,"u":0,"nb":0,"a":1,"ab":0},"FEB":{"t":2,"tm":5,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":1,"tm":9,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":2,"tm":14,"u":0,"nb":1,"a":1,"ab":0}},"y":{"t":6,"u":0,"nb":3,"a":2,"ab":0,"tot":11}},{"n":"REGIS, MICHAEL JUANITO T., JR.","c":"API","d":"INTERNATIONAL OPERATIONS","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":3,"ab":0},"FEB":{"t":2,"tm":33,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":3,"tm":212,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":5,"u":0,"nb":2,"a":4,"ab":0,"tot":11}},{"n":"ARANTE, RENATO P.","c":"DBTPI","d":"CROSS PRODUCT","p":"BUSINESS APPLICATION TESTER","m":{"JAN":{"t":6,"tm":143,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"tm":61,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":20,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":11,"u":0,"nb":0,"a":0,"ab":0,"tot":11}},{"n":"CLARA, ALFREDO U.","c":"DBTPI","d":"ADVANCED DIMENSIONS","p":"JR. BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":5,"tm":95,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"tm":63,"u":1,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":16,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":10,"u":1,"nb":0,"a":0,"ab":0,"tot":11}},{"n":"BACALSO, LIEL B.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":4,"tm":28,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":4,"tm":17,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":58,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":0,"a":1,"ab":0,"tot":10}},{"n":"SORILLA, IBBY JOICE C.","c":"ICC","d":"HUMAN RESOURCES","p":"HR SPECIALIST","m":{"JAN":{"t":3,"tm":27,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"tm":10,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":7,"u":0,"nb":3,"a":0,"ab":0,"tot":10}},{"n":"ANDRADE, ARON KEITH","c":"ICC","d":"BU - VISAYAS 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":9,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":3,"tm":25,"u":0,"nb":2,"a":0,"ab":0}},"y":{"t":6,"u":0,"nb":4,"a":0,"ab":0,"tot":10}},{"n":"CARNIYAN, JOYCE B.","c":"API","d":"ACCOUNTING AND FINANCE","p":"GENERAL ACCOUNTANT","m":{"JAN":{"t":4,"tm":9,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":4,"tm":7,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":1,"a":0,"ab":0,"tot":10}},{"n":"MULLET, JOHN MICHAEL B.","c":"DBTPI","d":"ASSET DIMENSIONS AND AGRICULTURE DIMENSIONS","p":"JR. BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":1,"tm":10,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":7,"tm":46,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":9,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":1,"a":0,"ab":0,"tot":10}},{"n":"DUARTE, NELMARK JHON P.","c":"ICC","d":"BU - MINDANAO 2","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":3,"tm":38,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"tm":22,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":4,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":2,"tm":4,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":9,"u":0,"nb":0,"a":0,"ab":0,"tot":9}},{"n":"PAGOBO, CHINLEY JANE M.","c":"ICC","d":"BU - MINDANAO 2","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":1,"tm":35,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":1,"tm":10,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":3,"tm":14,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":5,"u":0,"nb":4,"a":0,"ab":0,"tot":9}},{"n":"SISON, ALEXIS JOHN C.","c":"ICC","d":"CROSS BU","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":1,"ab":0},"FEB":{"t":3,"tm":34,"u":0,"nb":1,"a":2,"ab":0},"MAR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":4,"u":0,"nb":2,"a":3,"ab":0,"tot":9}},{"n":"VISANDE, JOSHUA D.","c":"ICC","d":"BU - MINDANAO 1","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"tm":14,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":2,"tm":3,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":6,"u":0,"nb":2,"a":1,"ab":0,"tot":9}},{"n":"DAYTIA, JOASH DALE A.","c":"ICC","d":"SOLUTIONS AND TRAINING","p":"SOLUTIONS AND TRAINING SR. SPECIALIST","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":8,"a":0,"ab":0,"tot":9}},{"n":"ORIA, JOSHUA F.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":5,"a":0,"ab":0},"FEB":{"t":1,"tm":2,"u":0,"nb":2,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":7,"a":1,"ab":0,"tot":9}},{"n":"PE\u00d1AFIEL, MAE ANNE A.","c":"DBTPI","d":"FACILITY DIMENSIONS AND ASSET DIMENSIONS","p":"JR. BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":6,"tm":103,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":13,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":1,"tm":19,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":8,"u":0,"nb":1,"a":0,"ab":0,"tot":9}},{"n":"TORILLO, JAMES BRYAN R.","c":"ICC","d":"BU - VISAYAS 2","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":91,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":4,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"APR":{"t":1,"tm":19,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":3,"u":0,"nb":3,"a":2,"ab":0,"tot":8}},{"n":"LUCAS, SENEN Y.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION TESTER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":3,"tm":51,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":26,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":4,"u":0,"nb":4,"a":0,"ab":0,"tot":8}},{"n":"INAYAWAN, MARY GRACE D.","c":"ICC","d":"BU - FINANCING AND BPO","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":3,"tm":21,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"tm":12,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":3,"tm":18,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":8,"u":0,"nb":0,"a":0,"ab":0,"tot":8}},{"n":"QUIMSON, MARIANITA D.","c":"ICC","d":"CROSS BU","p":"INSIDE SALES & CREDIT AND COLLECTION ASSISTANT","m":{"JAN":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":1,"ab":0},"MAR":{"t":4,"tm":11,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":6,"u":0,"nb":1,"a":1,"ab":0,"tot":8}},{"n":"MEDIL, JOHANSON P.","c":"ICC","d":"HUMAN RESOURCE & ADMIN","p":"HR SPECIALIST","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":7,"a":0,"ab":0,"tot":8}},{"n":"MACEDA, LOURHEN PAUL C.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":7,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":8,"a":0,"ab":0,"tot":8}},{"n":"MANUEL, RODERICK L.","c":"KTI","d":"RETAIL AND HARDWARE","p":"PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":7,"a":1,"ab":0,"tot":8}},{"n":"DAITOL, CHARLES GIL P.","c":"DBTPI","d":"CROSS BU","p":"SENIOR BUSINESS APPLICATION TESTING SUPERVISOR","m":{"JAN":{"t":2,"tm":64,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":1},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":5,"a":0,"ab":1,"tot":8}},{"n":"PADASAY, JHAN RODEEN V.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION TESTER","m":{"JAN":{"t":1,"tm":7,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":14,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":3,"tm":94,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":5,"u":0,"nb":2,"a":0,"ab":0,"tot":7}},{"n":"ANTALAN, CHRISTINE JOY S.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":3,"tm":10,"u":1,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":1,"nb":3,"a":0,"ab":0,"tot":7}},{"n":"SANAY, LEONARD B.","c":"KTI","d":"RETAIL AND HARDWARE","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":2,"tm":7,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":1,"tm":7,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":4,"a":0,"ab":0,"tot":7}},{"n":"PEREZ, MARIEL NICOLE M.","c":"DBTPI","d":"DIMENSIONS FOR FINANCING","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":4,"tm":122,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":4,"u":0,"nb":3,"a":0,"ab":0,"tot":7}},{"n":"VIVAS, NICA ANGELA R.","c":"DBTPI","d":"FINANCING DIMENSIONS","p":"BUSINESS APPLICATION DESIGN SUPERVISOR","m":{"JAN":{"t":5,"tm":44,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":11,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":6,"u":0,"nb":1,"a":0,"ab":0,"tot":7}},{"n":"CERENO, SHAIRA MAE A.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":26,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":5,"a":0,"ab":0,"tot":6}},{"n":"DICO, MARJORIE E.","c":"ICC","d":"BU - VISAYAS 1","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":1,"tm":5,"u":1,"nb":1,"a":0,"ab":0},"APR":{"t":2,"tm":14,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":1,"nb":1,"a":1,"ab":0,"tot":6}},{"n":"BALOCA, JEAN PAULA M.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":6,"u":0,"nb":0,"a":2,"ab":0}},"y":{"t":1,"u":0,"nb":2,"a":3,"ab":0,"tot":6}},{"n":"ENCINA, MARIANITO C.","c":"ICC","d":"HUMAN RESOURCE & ADMIN","p":"COMPANY DRIVER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":2,"a":1,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":4,"a":1,"ab":0,"tot":6}},{"n":"OLARTE, XANDERS N.","c":"ICC","d":"HUMAN RESOURCE & ADMIN","p":"HUMAN RESOURCE AND ADMIN SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":1,"u":0,"nb":3,"a":2,"ab":0,"tot":6}},{"n":"ESPINO, REMINA A.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":1,"tm":16,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1}},"y":{"t":1,"u":0,"nb":4,"a":0,"ab":1,"tot":6}},{"n":"AZARES, JOHN VINCE O.","c":"API","d":"INTERNATIONAL OPERATIONS","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":2,"a":1,"ab":0},"MAR":{"t":1,"tm":7,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":3,"a":2,"ab":0,"tot":6}},{"n":"PALAD, JONELLE R.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":6,"a":0,"ab":0,"tot":6}},{"n":"DANO, CHARLIE MAGNE R.","c":"ICC","d":"BU - MINDANAO 1","p":"LEAD - BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":3,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":1,"tm":18,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":37,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":2,"a":0,"ab":0,"tot":5}},{"n":"VILLAME, JOSHUA S.","c":"ICC","d":"BU - VISAYAS 2 AND MINDANAO 2","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":2,"tm":14,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":28,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":7,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":5,"u":0,"nb":0,"a":0,"ab":0,"tot":5}},{"n":"VILLEGAS, EDOUARD V.","c":"ICC","d":"BU - MINDANAO 2","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":1,"tm":12,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":8,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":3,"a":0,"ab":0,"tot":5}},{"n":"OHIDOR, LESTER JHON D.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":1,"tm":1,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":1,"u":0,"nb":2,"a":2,"ab":0,"tot":5}},{"n":"AQUE, ARBILL L.","c":"ICC","d":"BU - MINDANAO 2","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":5,"a":0,"ab":0,"tot":5}},{"n":"BAUTISTA, LINETTE G.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":1,"nb":1,"a":0,"ab":1},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":0,"u":1,"nb":2,"a":1,"ab":1,"tot":5}},{"n":"ARANCES, CRISTINE R.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"PRACTICE LEAD TRAINEE VISMIN / SENIOR BUSINESS APP","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":1,"tm":4,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":14,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":2,"a":0,"ab":0,"tot":5}},{"n":"RAMOS, ALLANA GILDA S.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"JR. PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":5,"a":0,"ab":0,"tot":5}},{"n":"MILANA, RYAH ANNE P.","c":"DBTPI","d":"AGRID AND ADVANCED DIMENSIONS - PHILTAX & CPM","p":"JR. BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":4,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":4,"u":0,"nb":1,"a":0,"ab":0,"tot":5}},{"n":"SALEN, WILBERT IRAH P.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":47,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":57,"u":0,"nb":0,"a":0,"ab":1},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":1,"a":0,"ab":1,"tot":4}},{"n":"SERDAN, RYAN F.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":23,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"tm":19,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":1,"a":0,"ab":0,"tot":4}},{"n":"AGBALO, AARON MANUEL B.","c":"ICC","d":"BU - FINANCING AND BPO","p":"QA TESTER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":8,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":1,"tm":6,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":7,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":1,"a":0,"ab":0,"tot":4}},{"n":"SANTILLAN, MARIA SHEL S.","c":"ICC","d":"BU - MINDANAO 2","p":"PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":1,"tm":19,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1}},"y":{"t":1,"u":0,"nb":2,"a":0,"ab":1,"tot":4}},{"n":"MIJARES, REY MART C.","c":"ICC","d":"BU - VISAYAS 1","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":4,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":13,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":2,"a":0,"ab":0,"tot":4}},{"n":"RODRIGUEZ, JAMAICA C.","c":"ICC","d":"HUMAN RESOURCES","p":"HR OPERATIONS SUPERVISOR","m":{"JAN":{"t":2,"tm":11,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"tm":5,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":4,"u":0,"nb":0,"a":0,"ab":0,"tot":4}},{"n":"ADERES, ANGELO S.","c":"ICC","d":"BU - MINDANAO 1","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":2,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":2,"ab":0,"tot":4}},{"n":"FLORES, CARMENCITA C.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":3,"a":1,"ab":0,"tot":4}},{"n":"SABRA, JONARD A.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":4,"a":0,"ab":0,"tot":4}},{"n":"GOMEZ, JONAH MAE A.","c":"API","d":"INTERNATIONAL OPERATIONS","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":97,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":3,"tm":133,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":4,"u":0,"nb":0,"a":0,"ab":0,"tot":4}},{"n":"ECHAGUE, ELLYN G.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"PRACTICE LEAD","m":{"JAN":{"t":2,"tm":8,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":2,"a":0,"ab":0,"tot":4}},{"n":"LAUD, ELISHA JANNIAH B.","c":"DBTPI","d":"ISV-CROSS PRODUCT","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":4,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":3,"a":0,"ab":0,"tot":4}},{"n":"MEDRINA, CHERRY C.","c":"ICC","d":"BU - MINDANAO 2","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":240,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":1,"ab":0,"tot":3}},{"n":"ANICOY, JEFFREY","c":"ICC","d":"BU - MINDANAO 2","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":8,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":25,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":0,"a":0,"ab":1,"tot":3}},{"n":"ESCUDERO, SCHYRIEN","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"BUSINESS APPLICATION TESTER","m":{"JAN":{"t":2,"tm":20,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":13,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":0,"a":0,"ab":0,"tot":3}},{"n":"PASTOR, DUKE IAN B.","c":"ICC","d":"BU - MINDANAO 2","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":1,"tm":31,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":2,"a":0,"ab":0,"tot":3}},{"n":"MAHIPOS, JEMIMA B.","c":"ICC","d":"BU - VISAYAS 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":1,"tm":27,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":3,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":1,"a":0,"ab":0,"tot":3}},{"n":"ARREZA, JESS CLARENCE I.","c":"ICC","d":"BU - FINANCING AND BPO","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":1,"tm":8,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":19,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":0,"a":0,"ab":0,"tot":3}},{"n":"DAVID, KURT DADE T.","c":"ICC","d":"CROSS BU","p":"JR. BUSINESS APPLICATION TEST DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":26,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":1,"ab":0,"tot":3}},{"n":"ALBARICO, JASMINE FATE F.","c":"ICC","d":"BU - VISAYAS 2","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":8,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"tm":4,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":1,"a":0,"ab":0,"tot":3}},{"n":"BELANDRES, ESTELLA E.","c":"ICC","d":"HUMAN RESOURCES","p":"HR SPECIALIST","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":11,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":2,"a":0,"ab":0,"tot":3}},{"n":"QUISOL, ARACILE C.","c":"ICC","d":"BU - MINDANAO 1","p":"PRACTICE LEAD","m":{"JAN":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":0,"a":0,"ab":0,"tot":3}},{"n":"CATIENZA, DANIEL I.","c":"ICC","d":"BU - MINDANAO 2","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":3,"a":0,"ab":0,"tot":3}},{"n":"MERCADO, CHRIZELYNE M.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":3,"a":0,"ab":0,"tot":3}},{"n":"PAJARIN, DANNA RICOLYN KAYE S.","c":"ICC","d":"BU - FINANCING AND BPO","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":3,"a":0,"ab":0,"tot":3}},{"n":"TORIO, BERNADETH B.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION QA TESTER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":3,"a":0,"ab":0,"tot":3}},{"n":"PADIN, JAPHET L.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":6,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":1,"ab":0,"tot":3}},{"n":"PEPITO, DIANA MARIE L.","c":"KTI","d":"RETAIL AND HARDWARE","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":1,"ab":1,"tot":3}},{"n":"YU, CHAZEL FAYE S.","c":"KTI","d":"RETAIL AND HARDWARE","p":"TBD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":1,"nb":0,"a":2,"ab":0}},"y":{"t":0,"u":1,"nb":0,"a":2,"ab":0,"tot":3}},{"n":"REMERATA, MICKHEL DAVEE S.","c":"DBTPI","d":"DIMENSIONS FOR PHILIPPINE OPERATIONS","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":3,"tm":54,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":0,"a":0,"ab":0,"tot":3}},{"n":"REAS, SANILYN D.","c":"DBTPI","d":"CROSS PRODUCT","p":"BUSINESS APPLICATION DESIGN MANAGER","m":{"JAN":{"t":3,"tm":25,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":3,"u":0,"nb":0,"a":0,"ab":0,"tot":3}},{"n":"VALDEVIESO, JESSA Q.","c":"ICC","d":"BU - VISAYAS 1","p":"CODED TESTER DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":240,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"MONEDA, CHRISTIAN MICHAEL A.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"QA TESTER","m":{"JAN":{"t":1,"tm":5,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":38,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":0,"a":0,"ab":0,"tot":2}},{"n":"CLENISTA, JUNALD JOHN C.","c":"ICC","d":"BU - FINANCING AND BPO","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":14,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"GLORIA, KARMELA LEANNE B.","c":"ICC","d":"BU - VISAYAS 2","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":1,"tm":10,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"PALAZON, ERIC JOHN E.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":10,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"DIAZ, ANTONIO L.","c":"ICC","d":"BU - VISAYAS 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":3,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":4,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":0,"a":0,"ab":0,"tot":2}},{"n":"MARZO, TEILHARD THEO C.","c":"ICC","d":"BU - RE | PM | ACAD, & FINANCING AND BPO","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"tm":4,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"MORQUIDA, ANNALEAH L.","c":"ICC","d":"BU - VISAYAS 2","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":0,"a":0,"ab":0,"tot":2}},{"n":"BATLE, LUZMAE ANN S.","c":"ICC","d":"ACCOUNTING AND FINANCE","p":"ACCOUNTING ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"GADAYAN, AILA KAYE S.","c":"ICC","d":"BU - VISAYAS 1","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":1,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":1,"nb":0,"a":0,"ab":0,"tot":2}},{"n":"ALONZO, RITZ O.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"LEAD - BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":1,"ab":0,"tot":2}},{"n":"BATING, MARY ANN P.","c":"ICC","d":"BU - FINANCING AND BPO","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"CASTRO, ARNEL F.","c":"ICC","d":"ACCOUNTING AND FINANCE","p":"LIASON OFFICER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"CRISTOBAL, CLAIRE N.","c":"ICC","d":"BU - FINANCING AND BPO","p":"PRACTICE LEAD","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":1,"ab":0,"tot":2}},{"n":"FRONTERAS, JENNIFER Y.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS UNIT HEAD - MINDANAO","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":0,"a":0,"ab":2,"tot":2}},{"n":"FUNTILAR, MARIA ANGELICA T.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":1,"ab":0,"tot":2}},{"n":"GATDULA, KHRISTINE JOY F.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"GUAN, HAZEL GRACE C.","c":"ICC","d":"HUMAN RESOURCES","p":"HUMAN RESOURCE GENERALIST","m":{"JAN":{"t":0,"tm":0,"u":1,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":1,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"LAMANILAO, RASYL MAE M.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"LEMOS, KENNETH V.","c":"ICC","d":"BU - FINANCING AND BPO","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"MARTE, GENELITO T.","c":"ICC","d":"BU - MINDANAO 2","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"REYES, MARK CHRISTIAN M.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"MANALO, JUAN KARLO M.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"PADADA, LEONARD BRYAN G.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"VILLASIN, JHAN VINCENT B.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0}},"y":{"t":0,"u":0,"nb":0,"a":2,"ab":0,"tot":2}},{"n":"ROSAURO, LEO JADE","c":"KTI","d":"RETAIL AND HARDWARE","p":"TECHNICAL SUPPORT ENGINEER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":2,"a":0,"ab":0,"tot":2}},{"n":"GELLICA, JHON LLOYD T.","c":"DBTPI","d":"DIMENSIONS FOR PHILIPPINE OPERATIONS","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":2,"tm":23,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":2,"u":0,"nb":0,"a":0,"ab":0,"tot":2}},{"n":"SUBILLAGA, EPHRAIM NICK Y.","c":"DBTPI","d":"CROSS BU","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":18,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"SO, CHARLENE GAILE G.","c":"DBTPI","d":"ASSET, AGRICULTURE, AND ADVANCED DIMENSIONS","p":"BUSINESS APPLICATION DESIGN SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":10,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":1,"a":0,"ab":0,"tot":2}},{"n":"AURIN, LEA MAE L.","c":"KTI","d":"RETAIL AND HARDWARE","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":1}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":1,"tot":2}},{"n":"URETA, JOHN MARK G.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":5,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"VILLAFLOR, LIV D.","c":"ICC","d":"BU - FINANCING AND BPO","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"DELA CUEVA, GABRIEL P.","c":"ICC","d":"BU - VISAYAS 1","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"PARRERA, ALEXIS C.","c":"ICC","d":"HUMAN RESOURCES","p":"HR SPECIALIST","m":{"JAN":{"t":1,"tm":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"DE GUIA, JULIA ROVIE M.","c":"ICC","d":"BU - MINDANAO 1","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"DE GUZMAN, MICHELLE G.","c":"ICC","d":"BU - FINANCING AND BPO","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"DONATO, JAMEA VENICE D.","c":"ICC","d":"BU - FINANCING AND BPO","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"ENRILE, JER ANTHONY O.","c":"ICC","d":"MARKETING DEPARTMENT","p":"MARKETING SPECIALIST","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"IZON, ALLEA MICOLE I.","c":"ICC","d":"BU - FINANCING AND BPO","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"JOSON, MARIANNE D.","c":"ICC","d":"BU - FINANCING AND BPO","p":"SR. BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"MILLORA, ANGELO JAMES W.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"NABONG, ROXANNE CRYSTAL MAE C.","c":"ICC","d":"BU - REAL ESTATE, PROPERTY MANAGEMENT, & ACADEME","p":"BUSINESS APPLICATION ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"ONGYACO, SHARMAINE S.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"PRAJES, JOHN PETER M.","c":"ICC","d":"CROSS BU","p":"JR. BUSINESS APPLICATION TEST DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"RAMOS, JOHN SEDRIC Z.","c":"ICC","d":"BU - RE | PM | ACAD, FINANCING, & MANUF AND AGRID","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":0,"a":1,"ab":0,"tot":1}},{"n":"SOBERANO, VINCEJI E.","c":"ICC","d":"CROSS BU","p":"SR. BUSINESS APPLICATION DESIGN SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"TALE\u00d1O, MICHELLE ANGELIKA M.","c":"ICC","d":"ACCOUNTING AND FINANCE","p":"ACCOUNTING ASSOCIATE","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":1,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":0,"a":1,"ab":0,"tot":1}},{"n":"TURIN, JESSIE ROM A.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"VIOS, KURT JASON P.","c":"ICC","d":"BU - MANUFACTURING AND AGRID LUZON","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"RUIZ, DIANA P.","c":"API","d":"BU - INTERNATIONAL","p":"BUSINESS APPLICATION CONSULTANT","m":{"JAN":{"t":1,"tm":6,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"SUBIDO, KRISTINE T.","c":"API","d":"BU - MICROSOFT AND SOLVER","p":"SALES SOLUTIONS CONSULTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"DACASIN, JENY LOU T.","c":"KTI","d":"ACCOUNTING AND FINANCE","p":"GENERAL ACCOUNTANT","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":5,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"TAPIS, LLOYD P.","c":"KTI","d":"RETAIL AND HARDWARE","p":"SENIOR TECHNICAL SUPPORT ENGINEER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"LETIGIO, MARJORIE S.","c":"DBTPI","d":"REAL ESTATE DIMENSIONS","p":"BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"tm":2,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":1,"u":0,"nb":0,"a":0,"ab":0,"tot":1}},{"n":"CAPAROSO, ALYSSA I.","c":"DBTPI","d":"REAL ESTATE DIMENSIONS","p":"BUSINESS APPLICATION DESIGNER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"DULHAO, DULCE ROSE E.","c":"DBTPI","d":"DIMENSIONS FOR FINANCING","p":"JR. BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"SALCEDO, CHANDA ROSALES R.","c":"DBTPI","d":"DIMENSIONS FOR PHILIPPINE OPERATIONS","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"SIBAL, RAYE VANNE A.","c":"DBTPI","d":"ISV-REAL ESTATE DIMENSION","p":"BUSINESS APPLICATION DEVELOPER","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}},{"n":"SORIMA, RENO ROY A.","c":"DBTPI","d":"DIMENSIONS FOR PHILIPPINE OPERATIONS","p":"BUSINESS APPLICATION DEVELOPMENT SUPERVISOR","m":{"JAN":{"t":0,"tm":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"tm":0,"u":0,"nb":0,"a":0,"ab":0}},"y":{"t":0,"u":0,"nb":1,"a":0,"ab":0,"tot":1}}];
+const DEPTS = [{"name":"BU - Microsoft And Solver","count":138,"people":17,"t":34,"u":1,"nb":93,"a":9,"ab":1,"tm":549,"monthly":{"JAN":{"t":13,"u":0,"nb":47,"a":2,"ab":0},"FEB":{"t":9,"u":1,"nb":26,"a":3,"ab":0},"MAR":{"t":5,"u":0,"nb":15,"a":1,"ab":0},"APR":{"t":7,"u":0,"nb":5,"a":3,"ab":1}},"top_emps":[{"name":"MADRAZO, EVANIE B.","co":"API","total":18},{"name":"PINEDA, JOANA MARIE D.","co":"API","total":17},{"name":"OROY, AARON TROY B.","co":"API","total":17},{"name":"INTERNO, GIO YVES C.","co":"API","total":15},{"name":"IGNITE, KRISTIAN PIOUS A.","co":"API","total":14}]},{"name":"BU - Manufacturing And Agrid Luzon","count":121,"people":20,"t":50,"u":1,"nb":61,"a":7,"ab":2,"tm":644,"monthly":{"JAN":{"t":9,"u":1,"nb":27,"a":1,"ab":1},"FEB":{"t":13,"u":0,"nb":16,"a":1,"ab":1},"MAR":{"t":16,"u":0,"nb":10,"a":1,"ab":0},"APR":{"t":12,"u":0,"nb":8,"a":4,"ab":0}},"top_emps":[{"name":"CELEBRE, MARYAM F.","co":"ICC","total":17},{"name":"BASUEL, ADRIANNE JOHN M.","co":"ICC","total":16},{"name":"HABAL, ALFIE C.","co":"ICC","total":16},{"name":"LEQUIN, JAMES CLAUDE B.","co":"ICC","total":11},{"name":"BACALSO, LIEL B.","co":"ICC","total":10}]},{"name":"BU - Mindanao 1","count":104,"people":13,"t":78,"u":1,"nb":17,"a":6,"ab":2,"tm":681,"monthly":{"JAN":{"t":32,"u":1,"nb":10,"a":0,"ab":0},"FEB":{"t":17,"u":0,"nb":3,"a":2,"ab":1},"MAR":{"t":15,"u":0,"nb":1,"a":0,"ab":1},"APR":{"t":14,"u":0,"nb":3,"a":4,"ab":0}},"top_emps":[{"name":"ARZAGA, CHARLIE C.","co":"ICC","total":46},{"name":"HINUGUIN, AINEE JOY","co":"ICC","total":11},{"name":"VISANDE, JOSHUA D.","co":"ICC","total":9},{"name":"PADASAY, JHAN RODEEN V.","co":"ICC","total":7},{"name":"ANTALAN, CHRISTINE JOY S.","co":"ICC","total":7}]},{"name":"BU - Real Estate, Property Management, & Academe","count":79,"people":11,"t":46,"u":0,"nb":29,"a":3,"ab":1,"tm":633,"monthly":{"JAN":{"t":15,"u":0,"nb":19,"a":1,"ab":0},"FEB":{"t":16,"u":0,"nb":7,"a":1,"ab":0},"MAR":{"t":10,"u":0,"nb":1,"a":0,"ab":1},"APR":{"t":5,"u":0,"nb":2,"a":1,"ab":0}},"top_emps":[{"name":"NAVARRO, KIM ANDREW A.","co":"ICC","total":32},{"name":"FLORES, JOHN POL J.","co":"ICC","total":13},{"name":"SAROL, JASPER RONNIE V.","co":"ICC","total":11},{"name":"SALEN, WILBERT IRAH P.","co":"ICC","total":4},{"name":"SERDAN, RYAN F.","co":"ICC","total":4}]},{"name":"BU - Visayas 1","count":49,"people":9,"t":30,"u":2,"nb":14,"a":2,"ab":1,"tm":494,"monthly":{"JAN":{"t":5,"u":0,"nb":5,"a":1,"ab":0},"FEB":{"t":9,"u":0,"nb":2,"a":1,"ab":1},"MAR":{"t":8,"u":1,"nb":5,"a":0,"ab":0},"APR":{"t":8,"u":1,"nb":2,"a":0,"ab":0}},"top_emps":[{"name":"SALES, LENDON B.","co":"ICC","total":19},{"name":"ANDRADE, ARON KEITH","co":"ICC","total":10},{"name":"DICO, MARJORIE E.","co":"ICC","total":6},{"name":"MIJARES, REY MART C.","co":"ICC","total":4},{"name":"MAHIPOS, JEMIMA B.","co":"ICC","total":3}]},{"name":"BU - Mindanao 2","count":46,"people":10,"t":21,"u":0,"nb":22,"a":1,"ab":2,"tm":470,"monthly":{"JAN":{"t":5,"u":0,"nb":13,"a":1,"ab":1},"FEB":{"t":4,"u":0,"nb":4,"a":0,"ab":0},"MAR":{"t":5,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":7,"u":0,"nb":3,"a":0,"ab":1}},"top_emps":[{"name":"DUARTE, NELMARK JHON P.","co":"ICC","total":9},{"name":"PAGOBO, CHINLEY JANE M.","co":"ICC","total":9},{"name":"VILLEGAS, EDOUARD V.","co":"ICC","total":5},{"name":"AQUE, ARBILL L.","co":"ICC","total":5},{"name":"SANTILLAN, MARIA SHEL S.","co":"ICC","total":4}]},{"name":"BU - Visayas 2","count":38,"people":6,"t":18,"u":1,"nb":15,"a":4,"ab":0,"tm":193,"monthly":{"JAN":{"t":4,"u":0,"nb":6,"a":1,"ab":0},"FEB":{"t":6,"u":0,"nb":4,"a":0,"ab":0},"MAR":{"t":4,"u":0,"nb":3,"a":1,"ab":0},"APR":{"t":4,"u":1,"nb":2,"a":2,"ab":0}},"top_emps":[{"name":"DEGORIO, FRANCIS C.","co":"ICC","total":12},{"name":"DASALLA, CRIS ERIC JR S.","co":"ICC","total":11},{"name":"TORILLO, JAMES BRYAN R.","co":"ICC","total":8},{"name":"ALBARICO, JASMINE FATE F.","co":"ICC","total":3},{"name":"GLORIA, KARMELA LEANNE B.","co":"ICC","total":2}]},{"name":"Cross BU","count":32,"people":7,"t":14,"u":0,"nb":12,"a":5,"ab":1,"tm":157,"monthly":{"JAN":{"t":3,"u":0,"nb":6,"a":2,"ab":0},"FEB":{"t":3,"u":0,"nb":4,"a":3,"ab":1},"MAR":{"t":5,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":3,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"SISON, ALEXIS JOHN C.","co":"ICC","total":9},{"name":"QUIMSON, MARIANITA D.","co":"ICC","total":8},{"name":"DAITOL, CHARLES GIL P.","co":"DBTPI","total":8},{"name":"DAVID, KURT DADE T.","co":"ICC","total":3},{"name":"SUBILLAGA, EPHRAIM NICK Y.","co":"DBTPI","total":2}]},{"name":"Accounting And Finance","count":31,"people":6,"t":25,"u":0,"nb":5,"a":1,"ab":0,"tm":96,"monthly":{"JAN":{"t":10,"u":0,"nb":3,"a":1,"ab":0},"FEB":{"t":10,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":4,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"MACEDA, KOLLINE A.","co":"ICC","total":15},{"name":"CARNIYAN, JOYCE B.","co":"API","total":10},{"name":"BATLE, LUZMAE ANN S.","co":"ICC","total":2},{"name":"CASTRO, ARNEL F.","co":"ICC","total":2},{"name":"TALE\u00d1O, MICHELLE ANGELIKA M.","co":"ICC","total":1}]},{"name":"BU - Financing And BPO","count":31,"people":13,"t":16,"u":0,"nb":14,"a":1,"ab":0,"tm":117,"monthly":{"JAN":{"t":4,"u":0,"nb":6,"a":0,"ab":0},"FEB":{"t":3,"u":0,"nb":4,"a":0,"ab":0},"MAR":{"t":6,"u":0,"nb":3,"a":1,"ab":0},"APR":{"t":3,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"INAYAWAN, MARY GRACE D.","co":"ICC","total":8},{"name":"AGBALO, AARON MANUEL B.","co":"ICC","total":4},{"name":"ARREZA, JESS CLARENCE I.","co":"ICC","total":3},{"name":"PAJARIN, DANNA RICOLYN KAYE S.","co":"ICC","total":3},{"name":"CLENISTA, JUNALD JOHN C.","co":"ICC","total":2}]},{"name":"Financing Dimensions","count":30,"people":2,"t":26,"u":0,"nb":4,"a":0,"ab":0,"tm":227,"monthly":{"JAN":{"t":12,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":10,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":2,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":2,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"LLIDO, NICA ANDREA L.","co":"DBTPI","total":23},{"name":"VIVAS, NICA ANGELA R.","co":"DBTPI","total":7}]},{"name":"Facility Dimensions And Asset Dimensions","count":27,"people":2,"t":26,"u":0,"nb":1,"a":0,"ab":0,"tm":346,"monthly":{"JAN":{"t":17,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":7,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"PELONGO, RHENALYN R.","co":"DBTPI","total":18},{"name":"PE\u00d1AFIEL, MAE ANNE A.","co":"DBTPI","total":9}]},{"name":"Retail And Hardware","count":26,"people":7,"t":3,"u":1,"nb":16,"a":4,"ab":2,"tm":14,"monthly":{"JAN":{"t":2,"u":0,"nb":4,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":6,"a":2,"ab":0},"MAR":{"t":1,"u":0,"nb":4,"a":0,"ab":1},"APR":{"t":0,"u":1,"nb":2,"a":2,"ab":1}},"top_emps":[{"name":"MANUEL, RODERICK L.","co":"KTI","total":8},{"name":"SANAY, LEONARD B.","co":"KTI","total":7},{"name":"PEPITO, DIANA MARIE L.","co":"KTI","total":3},{"name":"YU, CHAZEL FAYE S.","co":"KTI","total":3},{"name":"ROSAURO, LEO JADE","co":"KTI","total":2}]},{"name":"Dimensions For Philippine Operations","count":24,"people":5,"t":17,"u":0,"nb":4,"a":3,"ab":0,"tm":156,"monthly":{"JAN":{"t":8,"u":0,"nb":2,"a":2,"ab":0},"FEB":{"t":5,"u":0,"nb":1,"a":1,"ab":0},"MAR":{"t":3,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"GOTERA, ULYSES GERALD S.","co":"DBTPI","total":17},{"name":"REMERATA, MICKHEL DAVEE S.","co":"DBTPI","total":3},{"name":"GELLICA, JHON LLOYD T.","co":"DBTPI","total":2},{"name":"SALCEDO, CHANDA ROSALES R.","co":"DBTPI","total":1},{"name":"SORIMA, RENO ROY A.","co":"DBTPI","total":1}]},{"name":"International Operations","count":21,"people":3,"t":10,"u":0,"nb":5,"a":6,"ab":0,"tm":482,"monthly":{"JAN":{"t":0,"u":0,"nb":2,"a":4,"ab":0},"FEB":{"t":2,"u":0,"nb":2,"a":2,"ab":0},"MAR":{"t":5,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":3,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"REGIS, MICHAEL JUANITO T., JR.","co":"API","total":11},{"name":"AZARES, JOHN VINCE O.","co":"API","total":6},{"name":"GOMEZ, JONAH MAE A.","co":"API","total":4}]},{"name":"Human Resources","count":20,"people":5,"t":13,"u":1,"nb":6,"a":0,"ab":0,"tm":69,"monthly":{"JAN":{"t":6,"u":1,"nb":0,"a":0,"ab":0},"FEB":{"t":5,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":3,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"SORILLA, IBBY JOICE C.","co":"ICC","total":10},{"name":"RODRIGUEZ, JAMAICA C.","co":"ICC","total":4},{"name":"BELANDRES, ESTELLA E.","co":"ICC","total":3},{"name":"GUAN, HAZEL GRACE C.","co":"ICC","total":2},{"name":"PARRERA, ALEXIS C.","co":"ICC","total":1}]},{"name":"Human Resource & Admin","count":20,"people":3,"t":3,"u":0,"nb":14,"a":3,"ab":0,"tm":3,"monthly":{"JAN":{"t":0,"u":0,"nb":5,"a":1,"ab":0},"FEB":{"t":1,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":3,"a":1,"ab":0},"APR":{"t":2,"u":0,"nb":3,"a":1,"ab":0}},"top_emps":[{"name":"MEDIL, JOHANSON P.","co":"ICC","total":8},{"name":"ENCINA, MARIANITO C.","co":"ICC","total":6},{"name":"OLARTE, XANDERS N.","co":"ICC","total":6}]},{"name":"Sales Department","count":14,"people":1,"t":9,"u":0,"nb":3,"a":2,"ab":0,"tm":90,"monthly":{"JAN":{"t":5,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":2,"a":2,"ab":0},"APR":{"t":3,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"CANLAS, ELLAINE PAULA S.","co":"API","total":14}]},{"name":"Cross Product","count":14,"people":2,"t":14,"u":0,"nb":0,"a":0,"ab":0,"tm":250,"monthly":{"JAN":{"t":9,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"ARANTE, RENATO P.","co":"DBTPI","total":11},{"name":"REAS, SANILYN D.","co":"DBTPI","total":3}]},{"name":"Dimensions For Agriculture","count":14,"people":1,"t":12,"u":0,"nb":2,"a":0,"ab":0,"tm":207,"monthly":{"JAN":{"t":8,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"OMOSURA, BIENVENIDO","co":"DBTPI","total":14}]},{"name":"Technical Development","count":13,"people":1,"t":7,"u":0,"nb":6,"a":0,"ab":0,"tm":208,"monthly":{"JAN":{"t":2,"u":0,"nb":3,"a":0,"ab":0},"FEB":{"t":1,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":3,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"DACARA, NOEL A.","co":"API","total":13}]},{"name":"BU - International","count":13,"people":2,"t":8,"u":0,"nb":2,"a":2,"ab":1,"tm":88,"monthly":{"JAN":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"u":0,"nb":0,"a":2,"ab":0},"MAR":{"t":4,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":1,"a":0,"ab":1}},"top_emps":[{"name":"BULAHAN, MAYBELLE R.","co":"API","total":12},{"name":"RUIZ, DIANA P.","co":"API","total":1}]},{"name":"Isv-POS","count":13,"people":1,"t":9,"u":0,"nb":4,"a":0,"ab":0,"tm":56,"monthly":{"JAN":{"t":5,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":2,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"ANTOQUE, ANJO A.","co":"DBTPI","total":13}]},{"name":"Technical Support","count":12,"people":1,"t":11,"u":0,"nb":0,"a":0,"ab":1,"tm":140,"monthly":{"JAN":{"t":5,"u":0,"nb":0,"a":0,"ab":1},"FEB":{"t":3,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"VALENCIA, JOHN VINCENT G.","co":"ICC","total":12}]},{"name":"Advanced Dimensions","count":11,"people":1,"t":10,"u":1,"nb":0,"a":0,"ab":0,"tm":175,"monthly":{"JAN":{"t":5,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":3,"u":1,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"CLARA, ALFREDO U.","co":"DBTPI","total":11}]},{"name":"Asset Dimensions And Agriculture Dimensions","count":10,"people":1,"t":9,"u":0,"nb":1,"a":0,"ab":0,"tm":65,"monthly":{"JAN":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":7,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"MULLET, JOHN MICHAEL B.","co":"DBTPI","total":10}]},{"name":"Solutions And Training","count":9,"people":1,"t":1,"u":0,"nb":8,"a":0,"ab":0,"tm":2,"monthly":{"JAN":{"t":0,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":3,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":2,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"DAYTIA, JOASH DALE A.","co":"ICC","total":9}]},{"name":"Dimensions For Financing","count":8,"people":2,"t":4,"u":0,"nb":4,"a":0,"ab":0,"tm":122,"monthly":{"JAN":{"t":4,"u":0,"nb":2,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":2,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"PEREZ, MARIEL NICOLE M.","co":"DBTPI","total":7},{"name":"DULHAO, DULCE ROSE E.","co":"DBTPI","total":1}]},{"name":"BU - Visayas 2 And Mindanao 2","count":5,"people":1,"t":5,"u":0,"nb":0,"a":0,"ab":0,"tm":49,"monthly":{"JAN":{"t":2,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":2,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"VILLAME, JOSHUA S.","co":"ICC","total":5}]},{"name":"Agrid And Advanced Dimensions - Philtax & CPM","count":5,"people":1,"t":4,"u":0,"nb":1,"a":0,"ab":0,"tm":9,"monthly":{"JAN":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":1,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"MILANA, RYAH ANNE P.","co":"DBTPI","total":5}]},{"name":"Isv-Cross Product","count":4,"people":1,"t":1,"u":0,"nb":3,"a":0,"ab":0,"tm":4,"monthly":{"JAN":{"t":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":1,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"LAUD, ELISHA JANNIAH B.","co":"DBTPI","total":4}]},{"name":"BU - RE | PM | Acad, & Financing And BPO","count":2,"people":1,"t":1,"u":0,"nb":1,"a":0,"ab":0,"tm":4,"monthly":{"JAN":{"t":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":1,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"MARZO, TEILHARD THEO C.","co":"ICC","total":2}]},{"name":"Asset, Agriculture, And Advanced Dimensions","count":2,"people":1,"t":1,"u":0,"nb":1,"a":0,"ab":0,"tm":10,"monthly":{"JAN":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":1,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"SO, CHARLENE GAILE G.","co":"DBTPI","total":2}]},{"name":"Real Estate Dimensions","count":2,"people":2,"t":1,"u":0,"nb":1,"a":0,"ab":0,"tm":2,"monthly":{"JAN":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":1,"u":0,"nb":1,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"LETIGIO, MARJORIE S.","co":"DBTPI","total":1},{"name":"CAPAROSO, ALYSSA I.","co":"DBTPI","total":1}]},{"name":"Marketing Department","count":1,"people":1,"t":0,"u":0,"nb":1,"a":0,"ab":0,"tm":0,"monthly":{"JAN":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":1,"a":0,"ab":0}},"top_emps":[{"name":"ENRILE, JER ANTHONY O.","co":"ICC","total":1}]},{"name":"BU - RE | PM | Acad, Financing, & Manuf And Agrid","count":1,"people":1,"t":0,"u":0,"nb":0,"a":1,"ab":0,"tm":0,"monthly":{"JAN":{"t":0,"u":0,"nb":0,"a":1,"ab":0},"FEB":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"RAMOS, JOHN SEDRIC Z.","co":"ICC","total":1}]},{"name":"Isv-Real Estate Dimension","count":1,"people":1,"t":0,"u":0,"nb":1,"a":0,"ab":0,"tm":0,"monthly":{"JAN":{"t":0,"u":0,"nb":1,"a":0,"ab":0},"FEB":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"MAR":{"t":0,"u":0,"nb":0,"a":0,"ab":0},"APR":{"t":0,"u":0,"nb":0,"a":0,"ab":0}},"top_emps":[{"name":"SIBAL, RAYE VANNE A.","co":"DBTPI","total":1}]}];
+
+const DATA = {
+  months: ["JAN","FEB","MAR","APR"],
+  y2025: {
+    tard_mins: {JAN: 2495, FEB: 2313, MAR: 2949, APR: 1703},
+    nobio:     {JAN:   79, FEB:  105, MAR:   76, APR:  145},
+    adjustment:{JAN:   39, FEB:   19, MAR:   16, APR:    5},
+    absences:  {JAN:    4, FEB:    2, MAR:    2, APR:    0},
+  },
+  y2026: {
+    tardiness: {JAN: 193, FEB: 148, MAR: 112, APR:  84},
+    tard_mins: {JAN:2434, FEB:1716, MAR:1305, APR:1357},
+    nobio:     {JAN: 166, FEB: 101, MAR:  65, APR:  39},
+    adjustment:{JAN:  18, FEB:  18, MAR:   7, APR:  17},
+    absences:  {JAN:   3, FEB:   4, MAR:   3, APR:   4},
+    undertime: {JAN:   3, FEB:   2, MAR:   1, APR:   3},
+  },
+  co2026: {
+    ICC: {
+      JAN: {tardiness:94, undertime:3, nobio:99, adjustment:10, absences:3, tard_mins:936},
+      FEB: {tardiness:86, undertime:0, nobio:52, adjustment:8,  absences:3, tard_mins:1110},
+      MAR: {tardiness:78, undertime:1, nobio:33, adjustment:4,  absences:2, tard_mins:649},
+      APR: {tardiness:61, undertime:2, nobio:28, adjustment:12, absences:1, tard_mins:952},
+    },
+    API: {
+      JAN: {tardiness:25, undertime:0, nobio:53, adjustment:6, absences:0, tard_mins:397},
+      FEB: {tardiness:19, undertime:1, nobio:31, adjustment:7, absences:0, tard_mins:178},
+      MAR: {tardiness:19, undertime:0, nobio:20, adjustment:3, absences:0, tard_mins:497},
+      APR: {tardiness:14, undertime:0, nobio:6,  adjustment:3, absences:2, tard_mins:363},
+    },
+    KTI: {
+      JAN: {tardiness:2, undertime:0, nobio:4, adjustment:0, absences:0, tard_mins:7},
+      FEB: {tardiness:1, undertime:0, nobio:6, adjustment:2, absences:0, tard_mins:5},
+      MAR: {tardiness:1, undertime:0, nobio:4, adjustment:0, absences:1, tard_mins:7},
+      APR: {tardiness:0, undertime:1, nobio:2, adjustment:2, absences:1, tard_mins:0},
+    },
+    DBTPI: {
+      JAN: {tardiness:72, undertime:0, nobio:10, adjustment:2, absences:0, tard_mins:1094},
+      FEB: {tardiness:42, undertime:1, nobio:12, adjustment:1, absences:1, tard_mins:423},
+      MAR: {tardiness:14, undertime:0, nobio:8,  adjustment:0, absences:0, tard_mins:152},
+      APR: {tardiness:9,  undertime:0, nobio:3,  adjustment:0, absences:0, tard_mins:42},
+    },
+  },
+  companies: {
+    ICC:   {tardiness:319, undertime:6, nobio:212, adjustment:34, absences:9,  total:580},
+    API:   {tardiness:77,  undertime:1, nobio:110, adjustment:19, absences:2,  total:209},
+    DBTPI: {tardiness:137, undertime:1, nobio: 33, adjustment: 3, absences:1,  total:175},
+    KTI:   {tardiness:4,   undertime:1, nobio: 16, adjustment: 4, absences:2,  total: 27},
+  },
+  ytd_total: 991,
+    topApr: [
+    {rank:1, name:"ARZAGA, CHARLIE C.",       co:"ICC", total:10},
+    {rank:2, name:"CELEBRE, MARYAM F.",       co:"ICC", total:5},
+    {rank:3, name:"ANDRADE, ARON KEITH",      co:"ICC", total:5},
+    {rank:4, name:"PADASAY, JHAN RODEEN V.",  co:"ICC", total:4},
+    {rank:5, name:"SAROL, JASPER RONNIE V.",  co:"ICC", total:4},
+    {rank:6, name:"PAGOBO, CHINLEY JANE M.",  co:"ICC", total:4},
+    {rank:7, name:"DASALLA, CRIS ERIC JR S.", co:"ICC", total:4},
+    {rank:8, name:"NAVARRO, KIM ANDREW A.",   co:"ICC", total:3},
+    {rank:9, name:"BASUEL, ADRIANNE JOHN M.", co:"ICC", total:3},
+    {rank:10,name:"BALOCA, JEAN PAULA M.",    co:"ICC", total:3},
+  ],
+};
+
+// Compute risk per employee
+EMPLOYEES.forEach(function(e){
+  var c = 0;
+  if ((e.y.t  || 0) > 0) c++;
+  if ((e.y.u  || 0) > 0) c++;
+  if ((e.y.nb || 0) > 0) c++;
+  if ((e.y.a  || 0) > 0) c++;
+  if ((e.y.ab || 0) > 0) c++;
+  e.cats = c;
+  e.risk = c >= 3 ? "HIGH" : c === 2 ? "MEDIUM" : "LOW";
+});
+
+console.log("[Dashboard] Loaded " + EMPLOYEES.length + " employees");
+
+// STATE
+var state = { company: "ALL", category: "ALL", year: "both" };
+var tableSort = { key: "pct", asc: false };
+var aprSort = { key: "rank", asc: true };
+var empSort = { key: "tot", asc: false };
+var empSearch = "";
+var empRiskFilter = "ALL";
+var expandedIdx = null;
+var expandedDept = null;
+
+function fmt(n) { return Number(n).toLocaleString(); }
+function pct(a, b) {
+  if (a === 0) return b === 0 ? "0%" : "n/a";
+  return ((b - a) / a * 100).toFixed(0) + "%";
+}
+function deltaClass(a, b) { return (b < a) ? "down" : (b > a) ? "up" : "flat"; }
+function deltaSign(a, b) { return (b < a) ? "▼" : (b > a) ? "▲" : "▬"; }
+
+var CAT_LABELS = {
+  tardiness: "Tardiness (events)",
+  tard_mins: "Tardiness (minutes)",
+  nobio: "No Bio / DTR",
+  adjustment: "Adjustments",
+  absences: "Absences",
+};
+
+function get2026(cat) {
+  if (state.company === "ALL") {
+    if (cat === "tardiness") return DATA.y2026.tardiness;
+    return DATA.y2026[cat];
+  }
+  var co = DATA.co2026[state.company];
+  var out = {};
+  DATA.months.forEach(function(m){ out[m] = co[m][cat]; });
+  return out;
+}
+function get2025(cat) {
+  if (cat === "tardiness") cat = "tard_mins";
+  return DATA.y2025[cat] || {};
+}
+
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = "#475569";
+
+var baseLineOpts = {
+  responsive: true, maintainAspectRatio: false,
+  animation: { duration: 400 },
+  plugins: {
+    legend: { position: "bottom", labels: { font: { size: 11, weight: 600 }, padding: 14, boxWidth: 14, usePointStyle: true } },
+    tooltip: {
+      backgroundColor: "rgba(15,23,42,0.96)", titleColor: "#fbbf24", bodyColor: "#fff",
+      padding: 12, borderColor: "rgba(255,255,255,0.1)", borderWidth: 1,
+    },
+  },
+  scales: {
+    x: { grid: { display: false }, ticks: { font: { size: 11, weight: 600 }, color: "#0f172a" } },
+    y: { beginAtZero: true, ticks: { font: { size: 10 }, color: "#64748b" }, grid: { color: "#e2e8f0", lineWidth: 0.5 } },
+  },
+  interaction: { mode: "index", intersect: false },
+};
+
+var lineCharts = {};
+var combinedChart = null;
+
+function makeLineChart(canvasId, cat, color26) {
+  var ctx = document.getElementById(canvasId);
+  if (!ctx) { console.warn("Missing canvas " + canvasId); return; }
+  var ds25 = get2025(cat);
+  var ds26 = get2026(cat);
+  var datasets = [];
+  if ((state.year === "both" || state.year === "2025") && state.company === "ALL") {
+    datasets.push({
+      label: "2025",
+      data: DATA.months.map(function(m){ return ds25[m] != null ? ds25[m] : 0; }),
+      borderColor: "#94a3b8", backgroundColor: "rgba(148,163,184,0.12)",
+      borderWidth: 2.5, borderDash: [5, 4], tension: 0.3,
+      pointRadius: 5, pointHoverRadius: 8, pointBackgroundColor: "#94a3b8", fill: true,
+    });
+  }
+  if (state.year === "both" || state.year === "2026") {
+    datasets.push({
+      label: state.company === "ALL" ? "2026" : "2026 (" + state.company + ")",
+      data: DATA.months.map(function(m){ return ds26[m] != null ? ds26[m] : 0; }),
+      borderColor: color26, backgroundColor: color26 + "20",
+      borderWidth: 3, tension: 0.3,
+      pointRadius: 5.5, pointHoverRadius: 9, pointBackgroundColor: color26, fill: true,
+    });
+  }
+  if (lineCharts[canvasId]) lineCharts[canvasId].destroy();
+  lineCharts[canvasId] = new Chart(ctx, {
+    type: "line",
+    data: { labels: DATA.months, datasets: datasets },
+    options: baseLineOpts,
+  });
+}
+
+function renderLineCharts() {
+  try { makeLineChart("chartTardMins", "tard_mins", "#f59e0b"); } catch(e) { console.error("chartTardMins:", e); }
+  try { makeLineChart("chartNoBio",    "nobio",      "#7c3aed"); } catch(e) { console.error("chartNoBio:", e); }
+  try { makeLineChart("chartAdj",      "adjustment", "#0284c7"); } catch(e) { console.error("chartAdj:", e); }
+  try { makeLineChart("chartAbs",      "absences",   "#e11d48"); } catch(e) { console.error("chartAbs:", e); }
+}
+
+function renderCombined() {
+  try {
+    var isAll = state.company === "ALL";
+    var cats = ["tardiness", "nobio", "adjustment", "undertime", "absences"];
+    var labels = { tardiness: "Tardiness", nobio: "No Bio", adjustment: "Adjustment", undertime: "Undertime", absences: "Absences" };
+    var colors = { tardiness: "#f59e0b", nobio: "#7c3aed", adjustment: "#0284c7", undertime: "#0d9488", absences: "#e11d48" };
+    var datasets = cats.map(function(c) {
+      return {
+        label: labels[c],
+        data: DATA.months.map(function(m){
+          return isAll ? DATA.y2026[c][m] : DATA.co2026[state.company][m][c];
+        }),
+        backgroundColor: colors[c],
+        borderWidth: 0, borderRadius: 4,
+      };
+    });
+
+    document.getElementById("combinedTitle").innerHTML =
+      (isAll ? "2026 Within-Year Trajectory — All Categories" : state.company + " — 2026 Monthly Total") +
+      ' <span class="badge b-ink">stacked</span>';
+    var totals = DATA.months.map(function(_, i){
+      return datasets.reduce(function(s, d){ return s + (d.data[i] || 0); }, 0);
+    });
+    var drop = totals[0] > 0 ? (((totals[0] - totals[3]) / totals[0]) * 100).toFixed(0) : "0";
+    document.getElementById("combinedSub").textContent =
+      totals[0] + " in January, " + totals[3] + " in April — a " + drop + "% drop in four months";
+
+    if (combinedChart) combinedChart.destroy();
+    combinedChart = new Chart(document.getElementById("chartCombined"), {
+      type: "bar",
+      data: { labels: DATA.months, datasets: datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        animation: { duration: 400 },
+        plugins: {
+          legend: { position: "bottom", labels: { font: { size: 11, weight: 600 }, padding: 14, boxWidth: 14, usePointStyle: true } },
+          tooltip: { backgroundColor: "rgba(15,23,42,0.96)", titleColor: "#fbbf24", bodyColor: "#fff", padding: 12 },
+        },
+        scales: {
+          x: { stacked: true, grid: { display: false }, ticks: { font: { size: 12, weight: 700 }, color: "#0f172a" } },
+          y: { stacked: true, beginAtZero: true, ticks: { font: { size: 10 }, color: "#64748b" }, grid: { color: "#e2e8f0", lineWidth: 0.5 } },
+        },
+      },
+    });
+  } catch(e) { console.error("renderCombined:", e); }
+}
+
+function renderDeltaTable() {
+  try {
+    var categoryRows = [
+      { key: "tard_mins",  label: "Tardiness",   unit: "minutes" },
+      { key: "nobio",      label: "No Bio",      unit: "events" },
+      { key: "adjustment", label: "Adjustments", unit: "events" },
+      { key: "absences",   label: "Absences",    unit: "days" },
+    ];
+    var rows = categoryRows.map(function(row) {
+      var v25 = DATA.y2025[row.key];
+      var v26;
+      if (state.company === "ALL") {
+        v26 = DATA.y2026[row.key];
+      } else {
+        v26 = {};
+        DATA.months.forEach(function(m){ v26[m] = DATA.co2026[state.company][m][row.key]; });
+      }
+      var sum25 = DATA.months.reduce(function(s,m){ return s + v25[m]; }, 0);
+      var sum26 = DATA.months.reduce(function(s,m){ return s + v26[m]; }, 0);
+      return Object.assign({}, row, { v25:v25, v26:v26, sum25:sum25, sum26:sum26,
+        pct_num: sum25 === 0 ? 0 : (sum26 - sum25) / sum25,
+        jan25: v25.JAN, jan26: v26.JAN, feb25: v25.FEB, feb26: v26.FEB,
+        mar25: v25.MAR, mar26: v26.MAR, apr25: v25.APR, apr26: v26.APR,
+      });
+    });
+    var k = tableSort.key, dir = tableSort.asc ? 1 : -1;
+    rows.sort(function(a, b) {
+      if (k === "label") return a.label.localeCompare(b.label) * dir;
+      if (k === "pct") return (a.pct_num - b.pct_num) * dir;
+      return ((a[k] || 0) - (b[k] || 0)) * dir;
+    });
+
+    var tbody = document.querySelector("#deltaTable tbody");
+    tbody.innerHTML = "";
+    rows.forEach(function(row) {
+      var dc = deltaClass(row.sum25, row.sum26);
+      var bg = dc === 'down' ? '#ccfbf1' : dc === 'up' ? '#ffe4e6' : '#f1f5f9';
+      var cl = dc === 'down' ? '#0f766e' : dc === 'up' ? '#be123c' : '#64748b';
+      var tr = document.createElement("tr");
+      tr.classList.add("fade-update");
+      var html = '<td style="font-weight:700">' + row.label + '</td>' +
+        '<td style="color:#64748b;font-size:10.5px;font-style:italic">' + row.unit + '</td>';
+      DATA.months.forEach(function(m) {
+        html += '<td class="num" style="color:#94a3b8">' + fmt(row.v25[m]) + '</td>' +
+                '<td class="num" style="color:#0f172a;font-weight:700">' + fmt(row.v26[m]) + '</td>';
+      });
+      html += '<td class="num" style="color:#94a3b8">' + fmt(row.sum25) + '</td>' +
+              '<td class="num" style="color:#0f172a;font-weight:700">' + fmt(row.sum26) + '</td>' +
+              '<td class="num"><span class="delta-cell" style="background:' + bg + ';color:' + cl + '">' +
+              deltaSign(row.sum25, row.sum26) + ' ' + pct(row.sum25, row.sum26) + '</span></td>';
+      tr.innerHTML = html;
+      tbody.appendChild(tr);
+    });
+    document.querySelectorAll("#deltaTable th.sortable").forEach(function(th) {
+      th.classList.remove("sort-asc", "sort-desc");
+      if (th.dataset.sort === tableSort.key) th.classList.add(tableSort.asc ? "sort-asc" : "sort-desc");
+    });
+  } catch(e) { console.error("renderDeltaTable:", e); }
+}
+
+function renderCompanyCards() {
+  try {
+    var cg = document.getElementById("coGrid");
+    cg.innerHTML = "";
+    Object.keys(DATA.companies).forEach(function(co) {
+      var d = DATA.companies[co];
+      var pctOfTotal = (d.total / DATA.ytd_total * 100).toFixed(0);
+      var div = document.createElement("div");
+      div.className = "co-card " + co.toLowerCase() + (state.company === co ? " active" : "");
+      div.dataset.co = co;
+      div.innerHTML =
+        '<div class="co-head">' +
+          '<div class="co-name">' + co + '</div>' +
+          '<div class="co-pct-badge">' + pctOfTotal + '%</div>' +
+        '</div>' +
+        '<div class="co-total">' + fmt(d.total) + '</div>' +
+        '<div class="co-bd">' +
+          '<div class="co-bd-item">Tard <strong>' + d.tardiness + '</strong></div>' +
+          '<div class="co-bd-item">NoBio <strong>' + d.nobio + '</strong></div>' +
+          '<div class="co-bd-item">Adj <strong>' + d.adjustment + '</strong></div>' +
+          '<div class="co-bd-item">Abs <strong>' + d.absences + '</strong></div>' +
+        '</div>';
+      div.addEventListener("click", function() {
+        state.company = state.company === co ? "ALL" : co;
+        document.getElementById("companyFilter").value = state.company;
+        applyFilters();
+      });
+      cg.appendChild(div);
+    });
+  } catch(e) { console.error("renderCompanyCards:", e); }
+}
+
+function renderDept() {
+  try {
+    var deptList = document.getElementById("deptList");
+    deptList.innerHTML = "";
+    var maxDept = Math.max.apply(null, DEPTS.map(function(d){ return d.count; }));
+    DEPTS.forEach(function(d, idx) {
+      var isExpanded = expandedDept === d.name;
+      var w = (d.count / maxDept) * 100;
+      var rank = idx + 1;
+      var rankClr = rank <= 3 ? "#7c3aed" : rank <= 10 ? "#0f172a" : "#94a3b8";
+      var rankBg = rank <= 3 ? "#ede9fe" : rank <= 10 ? "#f1f5f9" : "transparent";
+
+      var row = document.createElement("div");
+      row.className = "dept-row dept-row-clickable" + (isExpanded ? " expanded" : "");
+      row.innerHTML =
+        '<div class="nm" style="display:flex;align-items:center;gap:10px">' +
+          '<span style="display:inline-flex;align-items:center;justify-content:center;min-width:24px;height:22px;padding:0 6px;background:' + rankBg + ';color:' + rankClr + ';border-radius:6px;font-size:10.5px;font-weight:700;font-family:JetBrains Mono,monospace">' + rank + '</span>' +
+          '<span class="dept-expand-arrow" style="display:inline-flex;align-items:center;justify-content:center;width:18px;height:18px;border-radius:4px;background:#f1f5f9;color:#475569;font-size:9px;font-weight:700;transition:.2s;' + (isExpanded ? 'background:#7c3aed;color:#fff;transform:rotate(90deg);' : '') + '">&#9654;</span>' +
+          '<span>' + d.name + '</span>' +
+        '</div>' +
+        '<div class="ct">' + d.count + ' <span class="ppl">&middot; ' + d.people + 'p</span></div>' +
+        '<div class="bar-wrap"><div class="bar" style="width:' + w + '%"></div></div>';
+      row.addEventListener("click", function() {
+        expandedDept = expandedDept === d.name ? null : d.name;
+        renderDept();
+      });
+      deptList.appendChild(row);
+
+      if (isExpanded) {
+        var detail = document.createElement("div");
+        detail.className = "dept-detail";
+        // Category breakdown rows
+        var cats = [
+          {key:'t',  label:'Tardiness',   val:d.t,  color:'#f59e0b', bg:'#fef3c7'},
+          {key:'nb', label:'No Bio',      val:d.nb, color:'#7c3aed', bg:'#ede9fe'},
+          {key:'a',  label:'Adjustment',  val:d.a,  color:'#0284c7', bg:'#e0f2fe'},
+          {key:'u',  label:'Undertime',   val:d.u,  color:'#0d9488', bg:'#ccfbf1'},
+          {key:'ab', label:'Absences',    val:d.ab, color:'#e11d48', bg:'#ffe4e6'},
+        ];
+        var maxCat = Math.max.apply(null, cats.map(function(c){return c.val;}));
+        if (maxCat === 0) maxCat = 1;
+        var catHtml = cats.map(function(c){
+          var pct = ((c.val / d.count) * 100).toFixed(0);
+          var barW = (c.val / maxCat) * 100;
+          return '<div class="dd-cat-row">' +
+                   '<div class="dd-cat-label" style="color:' + c.color + '">' + c.label + '</div>' +
+                   '<div class="dd-cat-bar-wrap" style="background:' + c.bg + '"><div class="dd-cat-bar" style="width:' + barW + '%;background:' + c.color + '"></div></div>' +
+                   '<div class="dd-cat-val"><strong>' + c.val + '</strong> <span style="color:#94a3b8;font-size:10px">(' + pct + '%)</span></div>' +
+                 '</div>';
+        }).join('');
+
+        // Monthly trend mini-bars
+        var months = ['JAN','FEB','MAR','APR'];
+        var monthTotals = months.map(function(m){
+          var mm = d.monthly[m];
+          return mm.t + mm.u + mm.nb + mm.a + mm.ab;
+        });
+        var maxMonth = Math.max.apply(null, monthTotals);
+        if (maxMonth === 0) maxMonth = 1;
+        var monthHtml = months.map(function(m, i){
+          var v = monthTotals[i];
+          var h = (v / maxMonth) * 100;
+          return '<div class="dd-month-col">' +
+                   '<div class="dd-month-val">' + v + '</div>' +
+                   '<div class="dd-month-bar" style="height:' + h + '%"></div>' +
+                   '<div class="dd-month-lbl">' + m + '</div>' +
+                 '</div>';
+        }).join('');
+
+        // Top employees in this dept
+        var empHtml = d.top_emps.map(function(emp, i){
+          return '<div class="dd-emp-row">' +
+                   '<span style="color:#94a3b8;font-family:JetBrains Mono,monospace;font-size:10.5px;width:18px;display:inline-block">' + (i+1) + '</span>' +
+                   '<span class="dd-emp-name">' + emp.name + '</span>' +
+                   '<span class="co-chip ' + emp.co.toLowerCase() + '">' + emp.co + '</span>' +
+                   '<span class="dd-emp-total"><strong>' + emp.total + '</strong></span>' +
+                 '</div>';
+        }).join('');
+
+        // Find dominant category
+        var dom = cats[0];
+        cats.forEach(function(c){ if (c.val > dom.val) dom = c; });
+        var domPct = ((dom.val / d.count) * 100).toFixed(0);
+
+        detail.innerHTML =
+          '<div class="dd-header">' +
+            '<div>' +
+              '<div class="dd-eyebrow">DOMINANT VIOLATION TYPE</div>' +
+              '<div class="dd-headline" style="color:' + dom.color + '">' + dom.label + ' (' + domPct + '%)</div>' +
+            '</div>' +
+            '<div class="dd-stats">' +
+              '<div class="dd-stat"><div class="dd-stat-v">' + d.count + '</div><div class="dd-stat-l">total violations</div></div>' +
+              '<div class="dd-stat"><div class="dd-stat-v">' + d.people + '</div><div class="dd-stat-l">unique people</div></div>' +
+              '<div class="dd-stat"><div class="dd-stat-v">' + d.tm + '</div><div class="dd-stat-l">tardiness mins</div></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="dd-section">' +
+            '<div class="dd-section-title">Violation breakdown by category</div>' +
+            '<div class="dd-cat-list">' + catHtml + '</div>' +
+          '</div>' +
+          '<div class="dd-section">' +
+            '<div class="dd-section-title">Monthly trend</div>' +
+            '<div class="dd-month-chart">' + monthHtml + '</div>' +
+          '</div>' +
+          '<div class="dd-section">' +
+            '<div class="dd-section-title">Top contributors</div>' +
+            '<div class="dd-emp-list">' + empHtml + '</div>' +
+          '</div>';
+        deptList.appendChild(detail);
+      }
+    });
+  } catch(e) { console.error("renderDept:", e); }
+}
+
+function renderTopApr() {
+  try {
+    var rows = DATA.topApr.slice();
+    if (state.company !== "ALL") rows = rows.filter(function(r){ return r.co === state.company; });
+    var k = aprSort.key, dir = aprSort.asc ? 1 : -1;
+    rows.sort(function(a, b) {
+      if (typeof a[k] === "string") return a[k].localeCompare(b[k]) * dir;
+      return (a[k] - b[k]) * dir;
+    });
+    var tbody = document.querySelector("#topApr tbody");
+    tbody.innerHTML = "";
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:#94a3b8;padding:20px;font-style:italic">No matching results</td></tr>';
+      return;
+    }
+    rows.forEach(function(e) {
+      var tr = document.createElement("tr");
+      tr.classList.add("fade-update");
+      tr.innerHTML =
+        '<td style="color:#94a3b8" class="num">' + e.rank + '</td>' +
+        '<td style="font-weight:600">' + e.name + '</td>' +
+        '<td><span class="co-chip ' + e.co.toLowerCase() + '">' + e.co + '</span></td>' +
+        '<td class="num"><strong style="color:#f59e0b">' + e.total + '</strong></td>';
+      tbody.appendChild(tr);
+    });
+    document.querySelectorAll("#topApr th.sortable").forEach(function(th) {
+      th.classList.remove("sort-asc", "sort-desc");
+      if (th.dataset.sort === aprSort.key) th.classList.add(aprSort.asc ? "sort-asc" : "sort-desc");
+    });
+  } catch(e) { console.error("renderTopApr:", e); }
+}
+
+function renderEmpTable() {
+  try {
+    var rows = EMPLOYEES.slice();
+    if (state.company !== "ALL") rows = rows.filter(function(r){ return r.c === state.company; });
+    if (empRiskFilter !== "ALL") rows = rows.filter(function(r){ return r.risk === empRiskFilter; });
+    if (empSearch) {
+      var s = empSearch.toLowerCase();
+      rows = rows.filter(function(r){
+        return (r.n && r.n.toLowerCase().indexOf(s) >= 0) ||
+               (r.d && r.d.toLowerCase().indexOf(s) >= 0) ||
+               (r.p && r.p.toLowerCase().indexOf(s) >= 0);
+      });
+    }
+    var k = empSort.key, dir = empSort.asc ? 1 : -1;
+    rows.sort(function(a, b) {
+      var av, bv;
+      if (k === "n" || k === "c" || k === "risk") { av = a[k]; bv = b[k]; }
+      else if (k === "tot" || k === "t" || k === "u" || k === "nb" || k === "a" || k === "ab") { av = a.y[k] || 0; bv = b.y[k] || 0; }
+      else { av = a[k]; bv = b[k]; }
+      if (typeof av === "string") return av.localeCompare(bv) * dir;
+      return (av - bv) * dir;
+    });
+
+    document.getElementById("empCount").textContent = rows.length;
+    var tbody = document.getElementById("empTbody");
+    tbody.innerHTML = "";
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="9">No matching employees</td></tr>';
+      return;
+    }
+    rows.forEach(function(e) {
+      var isExpanded = expandedIdx === e.n;
+      var tr = document.createElement("tr");
+      tr.className = "emp-row" + (isExpanded ? " expanded" : "");
+      tr.dataset.empId = e.n;
+      tr.innerHTML =
+        '<td><span class="expand-icon">&#9654;</span></td>' +
+        '<td>' +
+          '<div class="name-cell">' + e.n + '</div>' +
+          '<div class="dept-cell">' + e.d + '  &middot;  ' + e.p + '</div>' +
+        '</td>' +
+        '<td><span class="co-chip ' + e.c.toLowerCase() + '">' + e.c + '</span></td>' +
+        '<td><span class="risk-badge risk-' + e.risk.toLowerCase() + '">' + e.risk + '</span></td>' +
+        '<td class="num" style="color:#0f172a">' + (e.y.t  || 0) + '</td>' +
+        '<td class="num" style="color:#0f172a">' + (e.y.nb || 0) + '</td>' +
+        '<td class="num" style="color:#0f172a">' + (e.y.a  || 0) + '</td>' +
+        '<td class="num" style="color:#0f172a">' + (e.y.ab || 0) + '</td>' +
+        '<td class="num"><strong style="color:#f59e0b">' + e.y.tot + '</strong></td>';
+      tr.addEventListener("click", function() {
+        expandedIdx = expandedIdx === e.n ? null : e.n;
+        renderEmpTable();
+      });
+      tbody.appendChild(tr);
+
+      if (isExpanded) {
+        var detail = document.createElement("tr");
+        detail.className = "emp-detail";
+        var rowKeys = [["t","Tardiness (events)"],["tm","Tardiness (mins)"],["u","Undertime"],["nb","No Bio"],["a","Adjustment"],["ab","Absences"]];
+        var monthRowsHtml = rowKeys.map(function(pair) {
+          var key = pair[0], lbl = pair[1];
+          var sum = 0;
+          var cells = DATA.months.map(function(m) {
+            var v = (e.m[m] && e.m[m][key]) || 0;
+            sum += v;
+            var cellColor = v > 0 ? '#0f172a' : '#cbd5e1';
+            var cellWeight = v > 0 ? '700' : '500';
+            return '<td style="color:' + cellColor + ';font-weight:' + cellWeight + '">' + v + '</td>';
+          }).join('');
+          return '<tr><td>' + lbl + '</td>' + cells +
+                 '<td style="color:#f59e0b;font-weight:700">' + sum + '</td></tr>';
+        }).join('');
+        detail.innerHTML =
+          '<td colspan="9">' +
+            '<div class="emp-detail-inner">' +
+              '<div class="emp-detail-grid">' +
+                '<div class="emp-meta-card">' +
+                  '<div class="field"><div class="field-label">Employee</div><div class="field-value">' + e.n + '</div></div>' +
+                  '<div class="field"><div class="field-label">Position</div><div class="field-value">' + e.p + '</div></div>' +
+                  '<div class="field"><div class="field-label">Department</div><div class="field-value">' + e.d + '</div></div>' +
+                  '<div class="field"><div class="field-label">Company</div><div class="field-value"><span class="co-chip ' + e.c.toLowerCase() + '">' + e.c + '</span></div></div>' +
+                  '<div class="field"><div class="field-label">Risk Level</div><div class="field-value"><span class="risk-badge risk-' + e.risk.toLowerCase() + '">' + e.risk + '</span> &middot; violations across <strong>' + e.cats + '</strong> categor' + (e.cats === 1 ? 'y' : 'ies') + '</div></div>' +
+                  '<div class="field"><div class="field-label">YTD Total</div><div class="field-value"><strong style="color:#f59e0b;font-size:18px;font-family:Space Grotesk,sans-serif">' + e.y.tot + '</strong> violations</div></div>' +
+                '</div>' +
+                '<div>' +
+                  '<div style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-bottom:8px">Monthly breakdown</div>' +
+                  '<table class="emp-month-table">' +
+                    '<thead><tr><th>Category</th><th style="text-align:right">JAN</th><th style="text-align:right">FEB</th><th style="text-align:right">MAR</th><th style="text-align:right">APR</th><th style="text-align:right">YTD</th></tr></thead>' +
+                    '<tbody>' + monthRowsHtml + '</tbody>' +
+                  '</table>' +
+                '</div>' +
+              '</div>' +
+            '</div>' +
+          '</td>';
+        tbody.appendChild(detail);
+      }
+    });
+    document.querySelectorAll("#empTable th.sortable").forEach(function(th) {
+      th.classList.remove("sort-asc", "sort-desc");
+      if (th.dataset.sort === empSort.key) th.classList.add(empSort.asc ? "sort-asc" : "sort-desc");
+    });
+  } catch(e) { console.error("renderEmpTable:", e); }
+}
+
+function renderStats() {
+  try {
+    var cats = [
+      { key: "tard_mins",  cardId: "s1" },
+      { key: "nobio",      cardId: "s2" },
+      { key: "adjustment", cardId: "s3" },
+      { key: "absences",   cardId: "s4" },
+    ];
+    cats.forEach(function(c) {
+      var v25 = DATA.y2025[c.key];
+      var v26;
+      if (state.company === "ALL") {
+        v26 = DATA.y2026[c.key];
+      } else {
+        v26 = {};
+        DATA.months.forEach(function(m){ v26[m] = DATA.co2026[state.company][m][c.key]; });
+      }
+      var sum25 = DATA.months.reduce(function(s,m){ return s + v25[m]; }, 0);
+      var sum26 = DATA.months.reduce(function(s,m){ return s + v26[m]; }, 0);
+      document.getElementById(c.cardId + "-25").textContent = fmt(sum25);
+      document.getElementById(c.cardId + "-26").textContent = fmt(sum26);
+      var dc = deltaClass(sum25, sum26);
+      var dEl = document.getElementById(c.cardId + "-delta");
+      dEl.textContent = deltaSign(sum25, sum26) + " " + pct(sum25, sum26);
+      dEl.className = "delta " + dc;
+    });
+    document.querySelectorAll(".kpi").forEach(function(card) {
+      var match = card.dataset.cat === state.category;
+      card.classList.toggle("active", match);
+      card.classList.toggle("dim", state.category !== "ALL" && !match);
+    });
+  } catch(e) { console.error("renderStats:", e); }
+}
+
+function renderSummary() {
+  try {
+    var lbl = document.getElementById("summaryLabel");
+    var val = document.getElementById("summaryValue");
+    var cat = state.category;
+    var s25 = 0, s26 = 0, catLabel;
+    if (cat === "ALL") {
+      ["nobio","adjustment","absences"].forEach(function(c) {
+        var v25 = DATA.y2025[c];
+        var v26;
+        if (state.company === "ALL") v26 = DATA.y2026[c];
+        else { v26 = {}; DATA.months.forEach(function(m){ v26[m] = DATA.co2026[state.company][m][c]; }); }
+        DATA.months.forEach(function(m){ s25 += v25[m]; s26 += v26[m]; });
+      });
+      catLabel = "All categories";
+    } else {
+      var k = cat;
+      var v25 = DATA.y2025[k] || {};
+      var v26;
+      if (state.company === "ALL") v26 = DATA.y2026[k];
+      else { v26 = {}; DATA.months.forEach(function(m){ v26[m] = DATA.co2026[state.company][m][k]; }); }
+      s25 = DATA.months.reduce(function(s,m){ return s + (v25[m] || 0); }, 0);
+      s26 = DATA.months.reduce(function(s,m){ return s + (v26[m] || 0); }, 0);
+      catLabel = CAT_LABELS[cat];
+    }
+    var dc = deltaClass(s25, s26);
+    val.textContent = deltaSign(s25, s26) + " " + pct(s25, s26);
+    val.className = "val " + dc;
+    var coLabel = state.company === "ALL" ? "All companies" : state.company;
+    lbl.textContent = "YoY Δ — " + catLabel + " · " + coLabel;
+  } catch(e) { console.error("renderSummary:", e); }
+}
+
+function renderActiveFilters() {
+  try {
+    var div = document.getElementById("activeFilters");
+    var chips = [];
+    if (state.company !== "ALL") chips.push({ label: "Company: " + state.company, key: "company" });
+    if (state.category !== "ALL") chips.push({ label: "Category: " + CAT_LABELS[state.category], key: "category" });
+    if (state.year !== "both") chips.push({ label: "Year: " + state.year, key: "year" });
+    if (chips.length === 0) { div.innerHTML = ""; return; }
+    var html = '<span style="font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#64748b;margin-right:4px">Active filters:</span>';
+    chips.forEach(function(c){
+      html += '<span class="filter-chip">' + c.label + '<span class="x" data-key="' + c.key + '">&times;</span></span>';
+    });
+    div.innerHTML = html;
+    div.querySelectorAll(".x").forEach(function(x) {
+      x.addEventListener("click", function() {
+        var k = x.dataset.key;
+        if (k === "company") { state.company = "ALL"; document.getElementById("companyFilter").value = "ALL"; }
+        if (k === "category") { state.category = "ALL"; document.getElementById("categoryFilter").value = "ALL"; }
+        if (k === "year") {
+          state.year = "both";
+          document.querySelectorAll("#yearToggle button").forEach(function(b){
+            b.classList.toggle("active", b.dataset.year === "both");
+          });
+        }
+        applyFilters();
+      });
+    });
+  } catch(e) { console.error("renderActiveFilters:", e); }
+}
+
+function applyFilters() {
+  renderStats();
+  renderSummary();
+  renderLineCharts();
+  renderCombined();
+  renderDeltaTable();
+  renderCompanyCards();
+  renderTopApr();
+  renderEmpTable();
+  renderActiveFilters();
+}
+
+// EVENT WIRING
+document.getElementById("companyFilter").addEventListener("change", function(e){
+  state.company = e.target.value; applyFilters();
+});
+document.getElementById("categoryFilter").addEventListener("change", function(e){
+  state.category = e.target.value; applyFilters();
+});
+document.querySelectorAll("#yearToggle button").forEach(function(btn) {
+  btn.addEventListener("click", function() {
+    document.querySelectorAll("#yearToggle button").forEach(function(b){ b.classList.remove("active"); });
+    btn.classList.add("active");
+    state.year = btn.dataset.year; applyFilters();
+  });
+});
+document.getElementById("resetBtn").addEventListener("click", function() {
+  state.company = "ALL"; state.category = "ALL"; state.year = "both";
+  document.getElementById("companyFilter").value = "ALL";
+  document.getElementById("categoryFilter").value = "ALL";
+  document.querySelectorAll("#yearToggle button").forEach(function(b){
+    b.classList.toggle("active", b.dataset.year === "both");
+  });
+  empSearch = ""; empRiskFilter = "ALL";
+  document.getElementById("empSearch").value = "";
+  document.getElementById("empRiskFilter").value = "ALL";
+  expandedIdx = null;
+  applyFilters();
+});
+document.querySelectorAll(".kpi").forEach(function(card) {
+  card.addEventListener("click", function() {
+    var cat = card.dataset.cat;
+    state.category = state.category === cat ? "ALL" : cat;
+    document.getElementById("categoryFilter").value = state.category;
+    applyFilters();
+  });
+});
+document.querySelectorAll("#deltaTable th.sortable").forEach(function(th) {
+  th.addEventListener("click", function() {
+    var k = th.dataset.sort;
+    if (tableSort.key === k) tableSort.asc = !tableSort.asc;
+    else { tableSort.key = k; tableSort.asc = false; }
+    renderDeltaTable();
+  });
+});
+document.querySelectorAll("#topApr th.sortable").forEach(function(th) {
+  th.addEventListener("click", function() {
+    var k = th.dataset.sort;
+    if (aprSort.key === k) aprSort.asc = !aprSort.asc;
+    else { aprSort.key = k; aprSort.asc = k === "rank" || k === "name" || k === "co"; }
+    renderTopApr();
+  });
+});
+document.querySelectorAll("#empTable th.sortable").forEach(function(th) {
+  th.addEventListener("click", function() {
+    var k = th.dataset.sort;
+    if (empSort.key === k) empSort.asc = !empSort.asc;
+    else { empSort.key = k; empSort.asc = k === "n" || k === "c" || k === "risk"; }
+    renderEmpTable();
+  });
+});
+document.getElementById("empSearch").addEventListener("input", function(e) {
+  empSearch = e.target.value; expandedIdx = null; renderEmpTable();
+});
+document.getElementById("empRiskFilter").addEventListener("change", function(e) {
+  empRiskFilter = e.target.value; expandedIdx = null; renderEmpTable();
+});
+
+// INITIAL
+renderDept();
+applyFilters();
+console.log("[Dashboard] Initial render complete");
+</script>
+</body>
+</html>
